@@ -28,9 +28,9 @@ import { syncAllFastingReminders } from './fasting-reminders.js';
 import { remindAtCompareKey, remindAtUtcSql } from '../utils/reminder-schedule.js';
 
 const log = createLogger('Notifications');
-const APP_NAME = 'Yuvomi';
+const APP_NAME = 'tvceb';
 // Greift nur, wenn die verknuepfte Entitaet inzwischen geloescht wurde: nie den
-// App-Namen als Body wiederholen, sonst besteht die Notification nur aus "Yuvomi" (#581).
+// App-Namen als Body wiederholen, sonst besteht die Notification nur aus "tvceb" (#581).
 const FALLBACK_BODY = 'Reminder';
 const RETRY_DELAY_MS = 5 * 60 * 1000;
 const MAX_ATTEMPTS = 3;
@@ -77,7 +77,7 @@ function subscriptionBody(reminder) {
  * Systembenachrichtigung kann keines tragen: sie hat kein DOM, ihr `icon` zeigt
  * nur ein Teil der Plattformen, und ihr `badge` wird auf Android monochrom
  * maskiert, wodurch der Familienton ohnehin verloren ginge. Was auf JEDER
- * Plattform ankommt, ist der Titel, und der stand bisher app-weit auf „Yuvomi" -
+ * Plattform ankommt, ist der Titel, und der stand bisher app-weit auf „tvceb" -
  * also auf dem, was das System darueber ohnehin schon anzeigt. „Kalender" ueber
  * „Zahnarzttermin" beantwortet dieselbe Frage wie das Siegel im Toast.
  *
@@ -93,7 +93,7 @@ function subscriptionBody(reminder) {
  * Der Titel nannte das Modul, und der Tipp darauf landete trotzdem im
  * Dashboard: `url` stand fest auf `/reminders`, und diese Route gibt es in
  * `ROUTES` nicht - der Router fiel still auf `/` zurueck, Dokumenttitel
- * „Yuvomi · Yuvomi". Der Befund war schon vorher einer und ist seit der
+ * „tvceb · tvceb". Der Befund war schon vorher einer und ist seit der
  * Titel-Herkunft doppelt so teuer: die Meldung sagt jetzt, wo sie herkommt,
  * und schickt den Nutzer trotzdem woandershin.
  *

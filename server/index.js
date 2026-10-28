@@ -114,7 +114,7 @@ import { createStaticAssets } from './utils/static-assets.js';
 
 const log     = createLogger('Server');
 const logSync = createLogger('Sync');
-const logYuvomi = createLogger('Yuvomi');
+const logYuvomi = createLogger('tvceb');
 
 const { version: APP_VERSION } = JSON.parse(
   readFileSync(new URL('../package.json', import.meta.url), 'utf-8')
@@ -132,7 +132,7 @@ const getServiceWorkerResponse = createServiceWorkerResponseLoader(
 // Das prüft die Build-Revision schon beim Start und liefert in der Entwicklung
 // nach einer sw.js-Änderung dennoch die neue Quelle ohne manuellen Neustart.
 getServiceWorkerResponse();
-const DEFAULT_APP_NAME = 'Yuvomi';
+const DEFAULT_APP_NAME = 'tvceb';
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -258,7 +258,7 @@ const apiLimiter = rateLimit({
 // Bildern bleibt darunter, auch wenn ein zweites Geraet hinter demselben
 // Router dasselbe tut. Nach oben begrenzt bleibt es trotzdem, weil jeder
 // ungecachte Abruf von provider-thumbnail einen Abruf beim Provider ausloest
-// (routes/recipes.js) - ohne Deckel liesse sich Mealie ueber Yuvomi fluten.
+// (routes/recipes.js) - ohne Deckel liesse sich Mealie ueber tvceb fluten.
 const imageLimiter = rateLimit({
   windowMs: 60_000,
   max: 1200,

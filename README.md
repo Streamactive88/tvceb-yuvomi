@@ -1,3 +1,12 @@
+# tvceb-yuvomi
+
+Personal **tvceb** version of Yuvomi, with a Synology Docker Compose stack.
+See [SYNOLOGY.md](SYNOLOGY.md) and [compose.synology.yaml](compose.synology.yaml)
+for port 3245, persistent NAS storage and local source builds.
+The complete upstream source and MIT licence are retained below.
+
+---
+
 <div align="center">
   <img src="docs/logo.svg" alt="Yuvomi logo" width="92" />
 

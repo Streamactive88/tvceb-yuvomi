@@ -103,7 +103,7 @@ let navMinimizer = null;
 //
 // WARUM DER TITEL HIER STEHT UND NICHT IN EINER ZWEITEN LISTE: er stand einmal
 // daneben, in einer Map in routeTitle(). Die Liste wuchs, die Map nicht, und
-// /forgot-password, /reset-password und /join lieferten „Yuvomi · Yuvomi" -
+// /forgot-password, /reset-password und /join lieferten „tvceb · tvceb" -
 // WCAG 2.4.2 ist Level A, und es traf ausgerechnet die drei Wege, über die ein
 // neues Familienmitglied hereinkommt (Audit 2026-08-08, P1-2). Eine Route ohne
 // Titel soll auffallen, nicht still auf den App-Namen fallen; der Guard in
@@ -667,7 +667,7 @@ const MOBILE_FAVORITE_COUNT = 3;
 // Modul-Blaettern, und die erste, die eine neue Regel (kein Kopf ueber nur
 // einem Eintrag, R19) nicht mitbekommen haette.
 
-const DEFAULT_APP_NAME = 'Yuvomi';
+const DEFAULT_APP_NAME = 'tvceb';
 const APP_NAME_STORAGE_KEY = 'yuvomi-app-name';
 const APP_VERSION_STORAGE_KEY = 'yuvomi-app-version';
 
@@ -5232,7 +5232,7 @@ window.addEventListener('error', (e) => {
   // Ressource-Ladefehler (z.B. fehlgeschlagenes Bild): ignorieren
   if (e.target && e.target !== window) return;
   if (RESIZE_OBSERVER_NOTICE.test(e.message || '')) return;
-  console.error('[Yuvomi] Unbehandelter Fehler:', e.error ?? e.message);
+  console.error('[tvceb] Unbehandelter Fehler:', e.error ?? e.message);
   showToast(t('common.unexpectedError'), 'danger');
 });
 
@@ -5245,7 +5245,7 @@ window.addEventListener('unhandledrejection', (e) => {
     e.preventDefault();
     return;
   }
-  console.error('[Yuvomi] Unbehandeltes Promise-Rejection:', e.reason);
+  console.error('[tvceb] Unbehandeltes Promise-Rejection:', e.reason);
   showToast(unhandledErrorSentence(e.reason), 'danger');
   e.preventDefault(); // Konsolenfehler unterdrücken (bereits geloggt)
 });

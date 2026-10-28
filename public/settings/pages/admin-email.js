@@ -67,7 +67,7 @@ const ACCOUNT_PATH = '/settings/personal/account';
 
 const DEFAULTS = {
   host: '', port: 587, secure: 'starttls', user: '',
-  fromAddress: '', fromName: 'Yuvomi', passwordSet: false, envControlled: {},
+  fromAddress: '', fromName: 'tvceb', passwordSet: false, envControlled: {},
 };
 
 // Formularfeld je Konfigurationsfeld. Dieselben Namen wie CONFIG_KEYS in

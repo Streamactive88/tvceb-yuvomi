@@ -89,7 +89,7 @@ export function createEmailService({ db, nodemailer = nodemailerDefault, env = p
       user: resolve('user'),
       pass: resolve('pass'),
       fromAddress: resolve('fromAddress'),
-      fromName: resolve('fromName') || 'Yuvomi',
+      fromName: resolve('fromName') || 'tvceb',
     };
   }
 
@@ -174,9 +174,9 @@ export function createEmailService({ db, nodemailer = nodemailerDefault, env = p
       await transport.sendMail({
         from: fromHeader(c),
         to,
-        subject: 'Yuvomi SMTP test',
-        text: 'This is a test message confirming your Yuvomi SMTP configuration works.',
-        html: '<p>This is a test message confirming your Yuvomi SMTP configuration works.</p>',
+        subject: 'tvceb SMTP test',
+        text: 'This is a test message confirming your tvceb SMTP configuration works.',
+        html: '<p>This is a test message confirming your tvceb SMTP configuration works.</p>',
       });
       return { ok: true };
     } catch (err) {
