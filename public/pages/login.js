@@ -105,7 +105,7 @@ export async function render(container) {
           <div class="auth-divider">${esc(t('login.orDivider'))}</div>
           <a href="/api/v1/auth/oidc/start" class="btn btn--secondary auth-form__submit">${esc(t('login.loginWithSso'))}</a>
           ` : ''}
-          <p class="auth-form__forgot" hidden>
+          <p class="auth-form__forgot">
             <a href="/forgot-password" data-link>${esc(t('login.forgotPassword'))}</a>
           </p>
         </form>
@@ -441,12 +441,8 @@ function hydrateFromVersion(container, storedAppName) {
         // verhindert ein sichtbares Titel-Flackern bei jedem Aufruf.
         if (d.app_name !== storedAppName) setAppBranding(d.app_name);
       }
-      // „Passwort vergessen?" wie SSO gaten: nur anbieten, wenn der Server eine
-      // Reset-Mail tatsächlich zustellen kann (SMTP + BASE_URL). Sonst Sackgasse.
-      if (d?.password_reset_enabled) {
-        const forgot = container.querySelector('.auth-form__forgot');
-        if (forgot) forgot.hidden = false;
-      }
+      // Recovery codes remain usable without SMTP; the recovery page explains
+      // which reset methods this installation supports.
       const versionEl = container.querySelector('#auth-version');
       if (versionEl) {
         versionEl.textContent = d?.version ? t('login.version', { version: d.version }) : '';

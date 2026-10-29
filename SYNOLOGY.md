@@ -1,5 +1,54 @@
 # tvceb on Synology
 
+## Installed deployment — 30 October 2026
+
+- URL: **https://home.int.s8.net.au** (first administrator setup is pending).
+- NAS: `192.168.8.20`, Docker container `tvceb`, image `tvceb:2.82.0-recovery1`.
+- Built from published source revision `6313429956d4df0ce4a8b30bceddd5b3a17370a3`.
+- Dockhand project directory on the NAS:
+  `/volume1/docker/dockhand/stacks/s8netau/tvceb-yuvomi`.
+- Runtime Compose: `docker-compose.yml` in that directory; the image is imported
+  locally, so this deployed file has no source-build section.
+- Fresh encrypted database and documents use the four `/volume1/docker/yuvomi`
+  directories described below. There was no existing Yuvomi container or data folder.
+- Fresh session and database encryption keys are in the stack `.env` (mode `600`).
+  Back up that file securely with the database; the key is required for restoration.
+- `SESSION_SECURE=true`, `TRUST_PROXY=192.168.8.254`,
+  `BASE_URL=https://home.int.s8.net.au`; timezone remains `Europe/Bucharest`.
+- Technitium internal A record: `home.int.s8.net.au` → `192.168.8.254`, TTL 300.
+- NPMplus host ID 2 forwards HTTPS to `http://192.168.8.20:3245` with HTTPS
+  enforcement and existing wildcard certificate ID 6.
+- This PC has a backed-up hosts entry for the internal proxy because its configured
+  resolver is the router (`192.168.8.1`). Other clients need internal DNS
+  `192.168.8.253` or an equivalent local hostname mapping.
+- Verified: image build, isolated startup test, NAS container healthy, encrypted
+  database, internal DNS read-back, trusted HTTPS 200, live tvceb setup page.
+- No public DNS records or Cloudflare Tunnel routes were changed.
+
+The administrator account has been created. Its username is `admin`.
+
+## Administrator recovery
+
+The deployed image `tvceb:2.82.0-recovery1` adds a visible **Forgot password?**
+option on the login page. Configured email installations keep the existing email
+reset flow. Without SMTP, the page accepts a one-time recovery code issued from
+the server shell. No unauthenticated account-reset endpoint is added.
+
+From the Dockhand **tvceb** container shell:
+
+```sh
+node scripts/recover-admin.mjs --list
+node scripts/recover-admin.mjs --user-id 1 --username admin
+```
+
+The command backs up the encrypted database, preserves the account ID and data,
+invalidates its old password and sessions, and saves a private one-hour reset link
+and code in `/backups/admin-recovery.json` (mode 600). Open that link and choose a
+new password. Existing two-factor authentication settings are retained.
+
+The username must be unused by other accounts. With more than one administrator,
+select the intended account explicitly using `--user-id`.
+
 Personal display-branding fork of Yuvomi 2.82.0, based on upstream commit
 `aec5cf0cbc581b35b6377a5f56438a4ec5bbd01c`.
 The MIT licence and upstream attribution remain in LICENSE and README.md.
