@@ -5,6 +5,7 @@ import crypto from 'node:crypto';
 import * as db from '../server/db.js';
 import { hashPassword } from '../server/utils/password.js';
 import { createPasswordResetService } from '../server/services/password-reset.js';
+import { markTemporaryPassword } from '../server/services/temporary-password.js';
 
 const args = process.argv.slice(2);
 const option = (key, fallback) => args.includes(key) ? args[args.indexOf(key)+1] : fallback;
@@ -27,11 +28,14 @@ if (!path.isAbsolute(output)) throw Error('Use an absolute output path.');
 fs.mkdirSync(path.dirname(output), { recursive: true });
 const backup = path.join('/backups', 'before-admin-recovery-' + Date.now() + '.db');
 await db.backupToFile(backup);
-const passwordHash = await hashPassword(crypto.randomBytes(48).toString('hex'));
+const temporaryPassword = option('--temporary-password', null);
+if (args.includes('--temporary-password') && !temporaryPassword) throw Error('Supply a temporary password.');
+const passwordHash = await hashPassword(temporaryPassword || crypto.randomBytes(48).toString('hex'));
 const service = createPasswordResetService({ db: database });
 let recovery;
 database.transaction(() => {
   database.prepare('UPDATE users SET username = ?, password_hash = ? WHERE id = ?').run(username, passwordHash, account.id);
+  if (temporaryPassword) markTemporaryPassword(database, account.id, passwordHash);
   for (const session of database.prepare('SELECT sid, sess FROM sessions').all()) {
     try {
       if (JSON.parse(session.sess).userId === account.id) database.prepare('DELETE FROM sessions WHERE sid = ?').run(session.sid);

@@ -74,6 +74,7 @@ export async function render(container) {
              blendet das Formular aus, und ein Kind davon wäre mit ihm weg. -->
         ${authErrorHtml('reset-error')}
         <div class="form-success" id="reset-success" role="status" aria-live="polite" hidden></div>
+        ${new URLSearchParams(location.search).has('required') ? '<p role="status">You must choose a new password before signing in.</p>' : ''}
         <form class="auth-form" id="reset-form" novalidate>
           <div class="form-group">
             <label class="label" for="password">${esc(t('resetPassword.passwordLabel'))}</label>

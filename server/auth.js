@@ -1,3 +1,4 @@
+import { requiresPasswordChange } from './services/temporary-password.js';
 /**
  * Modul: Authentifizierung (Auth)
  * Zweck: Login-Route, Session-Middleware, Auth-Guard für geschützte Routen
@@ -1194,6 +1195,17 @@ function signedSessionCookieValue(req) {
  * @param {{ id: number, role: string }} user
  * @returns {Promise<void>}
  */
+function passwordChangeChallenge(req, res, user, redirect = false) {
+  if (!requiresPasswordChange(db.get(), user.id)) return false;
+  const { token } = defaultResetService.createToken(user.id);
+  delete req.session.userId;
+  delete req.session.pendingTwoFactor;
+  res.set('Cache-Control', 'no-store');
+  if (redirect) res.redirect('/reset-password?token=' + token);
+  else res.json({ passwordChangeRequired: true, resetToken: token });
+  return true;
+}
+
 function setupAuthSession(req, res, user) {
   return new Promise((resolve, reject) => {
     // Letzte Linie, nicht die Pruefung selbst: jeder Weg hierher fragt
@@ -1204,6 +1216,7 @@ function setupAuthSession(req, res, user) {
       log.error('Session refused: this account cannot sign in', { userId: user.id });
       return reject(new Error('This account cannot sign in.'));
     }
+    if (requiresPasswordChange(db.get(), user.id)) return reject(new Error('Password change required.'));
     req.session.regenerate((err) => {
       if (err) return reject(err);
       req.session.userId    = user.id;
@@ -1764,6 +1777,7 @@ router.post('/login', loginLimiter, async (req, res) => {
     }
 
     try {
+      if (passwordChangeChallenge(req, res, user)) return;
       await setupAuthSession(req, res, user);
       res.json(loginPayload(req, user));
     } catch (sessionErr) {
@@ -2629,6 +2643,7 @@ router.get('/oidc/callback', refuseWhileRestoring, async (req, res) => {
       return res.redirect('/login?two_factor=1');
     }
 
+    if (passwordChangeChallenge(req, res, user, true)) return;
     await setupAuthSession(req, res, user);
 
     res.redirect('/');
@@ -2968,6 +2983,7 @@ router.post('/2fa/verify', twoFactorLimiter, async (req, res) => {
     // `regenerate` legt eine neue, leere Session an - der Wartezustand ist
     // danach von selbst fort, und ein vor der Anmeldung untergeschobener
     // Sitzungsschlüssel taugt nichts mehr.
+    if (passwordChangeChallenge(req, res, user)) return;
     await setupAuthSession(req, res, user);
     log.info('Second factor accepted', { userId: user.id, method: result.method });
 

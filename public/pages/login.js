@@ -238,6 +238,10 @@ export async function render(container) {
         renderSecondFactor(container, { recoveryAvailable: result.recoveryAvailable === true });
         return;
       }
+      if (result?.passwordChangeRequired) {
+        window.yuvomi.navigate('/reset-password?token=' + encodeURIComponent(result.resetToken) + '&required=1');
+        return;
+      }
       window.yuvomi.navigate('/', result.user);
     } catch (err) {
       // Die Seite hat sich fuer das Formular entschieden, der Server lehnt es
@@ -392,6 +396,10 @@ function renderSecondFactor(container, { recoveryAvailable }) {
 
     try {
       const result = await auth.verifyTwoFactor(code);
+      if (result?.passwordChangeRequired) {
+        window.yuvomi.navigate('/reset-password?token=' + encodeURIComponent(result.resetToken) + '&required=1');
+        return;
+      }
       window.yuvomi.navigate('/', result.user);
     } catch (err) {
       // 401 heisst hier zweierlei: falscher Code oder abgelaufener Wartezustand.

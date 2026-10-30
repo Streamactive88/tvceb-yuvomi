@@ -69,3 +69,4 @@ install.sh
 Thumbs.db
 *.swp
 *.swo
+!scripts/recover-admin.mjs

@@ -2,8 +2,8 @@
 
 ## Installed deployment — 30 October 2026
 
-- URL: **https://home.int.s8.net.au** (first administrator setup is pending).
-- NAS: `192.168.8.20`, Docker container `tvceb`, image `tvceb:2.82.0-recovery1`.
+- URL: **https://home.int.s8.net.au**.
+- NAS: `192.168.8.20`, Docker container `tvceb`, image `tvceb:2.82.0-recovery2`.
 - Built from published source revision `6313429956d4df0ce4a8b30bceddd5b3a17370a3`.
 - Dockhand project directory on the NAS:
   `/volume1/docker/dockhand/stacks/s8netau/tvceb-yuvomi`.
@@ -29,7 +29,7 @@ The administrator account has been created. Its username is `admin`.
 
 ## Administrator recovery
 
-The deployed image `tvceb:2.82.0-recovery1` adds a visible **Forgot password?**
+The deployed image `tvceb:2.82.0-recovery2` adds a visible **Forgot password?**
 option on the login page. Configured email installations keep the existing email
 reset flow. Without SMTP, the page accepts a one-time recovery code issued from
 the server shell. No unauthenticated account-reset endpoint is added.
@@ -108,3 +108,5 @@ Retain any encryption key with the backup.
 The source archive contains no `.env`, live data or credentials. After editing
 the source, rebuild with the same Compose command. The original Yuvomi logo,
 storage identifiers, API paths and database migrations are retained for compatibility.
+
+To set a temporary administrator password that must be changed before access, run the recovery helper with --temporary-password and your chosen temporary value. This also backs up the database and revokes existing sessions. The normal minimum of eight characters applies to the replacement password.
