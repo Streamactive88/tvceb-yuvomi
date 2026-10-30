@@ -13,7 +13,7 @@
   directories described below. There was no existing Yuvomi container or data folder.
 - Fresh session and database encryption keys are in the stack `.env` (mode `600`).
   Back up that file securely with the database; the key is required for restoration.
-- `SESSION_SECURE=true`, `TRUST_PROXY=192.168.8.254`,
+- `SESSION_SECURE=true`, `TRUST_PROXY=192.168.64.1,192.168.8.254`,
   `BASE_URL=https://home.int.s8.net.au`; timezone remains `Europe/Bucharest`.
 - Technitium internal A record: `home.int.s8.net.au` → `192.168.8.254`, TTL 300.
 - NPMplus host ID 2 forwards HTTPS to `http://192.168.8.20:3245` with HTTPS
@@ -110,3 +110,5 @@ the source, rebuild with the same Compose command. The original Yuvomi logo,
 storage identifiers, API paths and database migrations are retained for compatibility.
 
 To set a temporary administrator password that must be changed before access, run the recovery helper with --temporary-password and your chosen temporary value. This also backs up the database and revokes existing sessions. The normal minimum of eight characters applies to the replacement password.
+
+The installed Synology bridge presents incoming proxy connections as 192.168.64.1. Both this gateway and NPMplus (192.168.8.254) must be trusted for HTTPS recognition and secure session-cookie issuance. Trusting only NPMplus causes a successful login to return to the login page without retaining a session. The corrected setting was verified with the application session middleware: the previous setting omits the cookie; the corrected setting issues a Secure, HttpOnly cookie and preserves the session on the next request. SESSION_SECURE remains true.
