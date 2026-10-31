@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 const file = '/usr/src/app/server/dist/repositories/oauth.repository.js';
 let source = fs.readFileSync(file, 'utf8');
@@ -8,3 +9,5 @@ source = source.replace(anchors[0], "if (tokenClaims && 'email' in tokenClaims &
 source = source.replace(anchors[1], 'profile = normalizeFamilyProfile(profile);\n            if (!profile.sub) {');
 source = source.replace(anchors[2], 'fetchUserInfo(client, tokens.access_token, tokenClaims?.sub ?? skipSubjectCheck)');
 fs.writeFileSync(file, source);
+
+fs.writeFileSync(file + '.sha256', createHash('sha256').update(source).digest('hex') + '  patched-oauth.repository.js\n');

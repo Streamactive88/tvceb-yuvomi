@@ -6,7 +6,7 @@ export async function render(container) {
     <section aria-label="Family passwords">
       <h2>Family passwords</h2>
       <p>Open your vault to find or save a password.</p>
-      <p><a class="btn btn--primary" href="https://vault.int.s8.net.au/" target="_blank" rel="noopener noreferrer">Open Vaultwarden ↗</a></p>
+      <p><a class="btn btn--primary" href="https://vault.example.invalid/" target="_blank" rel="noopener noreferrer">Open Vaultwarden ↗</a></p>
       <p>Sign in with your existing vault account. Your passwords stay in Vaultwarden.</p>
     </section>` }));
 }

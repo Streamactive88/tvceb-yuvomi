@@ -54,16 +54,16 @@ docker compose -f compose.yml config --quiet
 docker compose -f compose.yml up -d --build
 ```
 
-The service listens at `192.168.8.20:3246` and authenticates against `http://tvceb:3000`.
+The service listens at `NAS_LAN_IP:3246` and authenticates against `http://tvceb:3000`.
 Direct anonymous requests cannot access camera metadata or images. Keep that port on the
 LAN and do not publish it through a tunnel. No changes to the camera/NVR are required.
 
 ## Same-origin reverse proxy
 
-Add a location on the **existing** `home.int.s8.net.au` proxy host:
+Add a location on the **existing** `home.example.invalid` proxy host:
 
 - Location: `/api/extensions/tvceb-cctv/`
-- Upstream: `http://192.168.8.20:3246`
+- Upstream: `http://NAS_LAN_IP:3246`
 - Preserve the complete path and the incoming Cookie header.
 - Keep buffering/caching disabled for this location. Do not add an anonymous auth bypass.
 
@@ -78,6 +78,14 @@ private viewer username/password files via `SS_USERNAME_FILE` and `SS_PASSWORD_F
 Use a Surveillance Station user permitted only to view the selected cameras. The adapter
 allowlists listing and snapshots; it cannot forward arbitrary API methods. `CCTV_CAMERA_IDS`
 can restrict the exposed numeric camera IDs. TLS validation is never disabled.
+
+`CCTV_CAMERA_IDS` applies to RTSP and Surveillance Station alike. Only listed
+IDs are listed or served. Recorder URLs using `/cam/realmonitor` are converted
+to `subtype=1` for previews. Other RTSP URLs retain their configured stream.
+The viewer shares decoders per channel and limits simultaneous decoders to four;
+busy previews can be retried. Bind the sidecar to loopback by default. If the
+reverse proxy runs on another machine, explicitly set `CCTV_BIND_ADDRESS` to a
+private LAN address and restrict inbound access there.
 
 ## Verification
 

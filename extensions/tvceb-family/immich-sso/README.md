@@ -18,6 +18,9 @@ base image and run:
 node /out/patch.mjs
 node --check /usr/src/app/server/dist/repositories/oauth.repository.js
 cp /usr/src/app/server/dist/repositories/oauth.repository.js /out/patched-oauth.repository.js
+cp /usr/src/app/server/dist/repositories/oauth.repository.js.sha256 /out/patched-oauth.repository.js.sha256
+cd /out
+sha256sum -c patched-oauth.repository.js.sha256
 ```
 
 Then build with `docker build -f Dockerfile.synology -t tvceb-immich:3.3.5-family-sso1 .`.
@@ -25,3 +28,8 @@ The generated repository file stays outside Git. Apply the image only to
 `immich-server`; preserve all other services, persistent mounts and settings.
 The HTTPS mobile callback must be registered with Synology and configured as
 Immich's mobile redirect override.
+
+The patch emits a SHA-256 manifest alongside the compiled file. Keep the manifest
+with the private deployment records, record the pinned base digest and generated
+image digest, and verify it before every COPY-only Synology build. The standard
+Docker build retains the checksum next to the patched file in the image.

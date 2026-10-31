@@ -93,6 +93,8 @@ export function requestedOidcScope() {
 export function oidcIdentityAllowed(claims, userinfo) {
   const allowedGroups = configuredList(process.env.OIDC_ALLOWED_GROUPS);
   const allowedUsers = configuredList(process.env.OIDC_ALLOWED_USERNAMES);
+  if (/\/webman\/sso\/?$/.test(process.env.OIDC_ISSUER || '') && (!allowedGroups.length || !allowedUsers.length)) return false;
+  if (allowedGroups.length && !allowedUsers.length) return false;
   const groups = Object.hasOwn(userinfo ?? {}, 'groups') ? userinfo.groups : claims?.groups;
   if (allowedGroups.length && (!Array.isArray(groups) || !groups.some(group => typeof group === 'string' && allowedGroups.includes(group)))) return false;
   const username = userinfo?.preferred_username ?? userinfo?.username ?? claims?.preferred_username ?? claims?.username;

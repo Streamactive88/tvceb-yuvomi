@@ -6,6 +6,29 @@ import { createSynology } from '../service/synology.mjs';
 import { createRtsp } from '../service/rtsp.mjs';
 import { EventEmitter } from 'node:events';
 
+test('RTSP allowlist hides and denies other channels and forces the recorder substream', async () => {
+  let child;
+  const camera=createRtsp({config:{cameras:[1,2].map(id=>({id,url:`rtsp://viewer:fixture@192.0.2.1/cam/realmonitor?channel=${id}&subtype=0`}))},allowedIds:['2'],spawnProcess:(command,args)=>{
+    const input=new URL(args[args.indexOf('-i')+1]);assert.equal(input.searchParams.get('subtype'),'1');
+    child=new EventEmitter();child.stdout=new EventEmitter();child.kill=()=>child.emit('exit',0);return child;
+  }});
+  assert.deepEqual((await camera.list()).map(c=>c.id),[2]);
+  await assert.rejects(camera.snapshot(1),e=>e.status===404);
+  const result=camera.snapshot(2);child.stdout.emit('data',Buffer.from([0xff,0xd8,0xff,0xd9]));await result;camera.close();
+});
+
+test('RTSP decoder limit does not interrupt pending snapshots', async () => {
+  const children=[];
+  const camera=createRtsp({config:{cameras:[1,2,3].map(id=>({id,url:`rtsp://192.0.2.1/stream/${id}`}))},maxStreams:2,spawnProcess:()=>{
+    const child=new EventEmitter();child.stdout=new EventEmitter();child.kill=()=>child.emit('exit',0);children.push(child);return child;
+  }});
+  const first=camera.snapshot(1),second=camera.snapshot(2);
+  await assert.rejects(camera.snapshot(3),e=>e.status===503);assert.equal(children.length,2);
+  for(const child of children)child.stdout.emit('data',Buffer.from([0xff,0xd8,0xff,0xd9]));
+  await Promise.all([first,second]);
+  const third=camera.snapshot(3);children[2].stdout.emit('data',Buffer.from([0xff,0xd8,0xff,0xd9]));await third;camera.close();
+});
+
 const json = (value, status = 200) => new Response(JSON.stringify(value), { status, headers: { 'content-type': 'application/json' } });
 const jpeg = Buffer.from([0xff, 0xd8, 0xff, 0xd9]);
 

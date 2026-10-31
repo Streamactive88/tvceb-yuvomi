@@ -25,35 +25,12 @@ function renderUnavailable(container) {
       ${authHeroHtml({ heading: false })}
       <div class="auth-card card card--padded">
         <h1 class="auth-card__title">${esc(t('forgotPassword.title'))}</h1>
-        <p class="auth-card__intro">Email reset is not configured. Enter a one-time recovery code supplied by your server administrator.</p>
-        <form class="auth-form" id="recovery-form" novalidate>
-          <div class="form-group">
-            <label class="label" for="recovery-code">Recovery code</label>
-            <input class="input" id="recovery-code" name="recoveryCode" type="text"
-              autocomplete="off" autocapitalize="none" spellcheck="false" required />
-          </div>
-          ${authErrorHtml('recovery-error')}
-          <button type="submit" class="btn btn--primary auth-form__submit">Continue to reset password</button>
-        </form>
-        <p class="auth-card__intro">NAS owner: use the Dockhand container shell to run <code>node scripts/recover-admin.mjs --username admin</code> inside tvceb. The recovery details are saved in <code>/backups/admin-recovery.json</code>. Keep the code private; it expires after one hour.</p>
+        <p class="auth-card__intro">${esc(t('forgotPassword.unavailable'))}</p>
         <p class="auth-form__forgot"><a href="/login" data-link>${esc(t('forgotPassword.backToLogin'))}</a></p>
       </div>
     </main>
   `);
   wireLinks(container);
-  const form = container.querySelector('#recovery-form');
-  const error = container.querySelector('#recovery-error');
-  form.addEventListener('submit', (event) => {
-    event.preventDefault();
-    const code = form.recoveryCode.value.trim();
-    if (!/^[a-f0-9]{64}$/i.test(code)) {
-      error.textContent = 'Enter the complete 64-character recovery code.';
-      error.hidden = false;
-      form.recoveryCode.focus();
-      return;
-    }
-    window.yuvomi.navigate('/reset-password?token=' + encodeURIComponent(code));
-  });
 }
 
 export async function render(container) {

@@ -51,7 +51,7 @@ const ui = read('../public/utils/auth-ui.js');
 
 test('R16: jede Seite vor der Anmeldung traegt denselben Kopf mit der Marke', () => {
   assert.match(ui, /export function authHeroHtml\(/);
-  assert.match(ui, /<span class="auth-hero__mark" aria-hidden="true">\$\{brandMarkSvg\(\)\}<\/span>/, 'der Baustein fuehrt die Marke');
+  assert.match(ui, /<span class="auth-hero__mark" aria-hidden="true" data-family-mark>\$\{familyMarkHtml\(\)\}<\/span>/, 'the shared auth mark supplies a loaded portrait or built-in fallback');
   for (const page of AUTH_FORMS) {
     const src = read(`../public/pages/${page}.js`);
     const mains = (src.match(/<main class="auth-page" id="main-content">/g) ?? []).length;
@@ -129,7 +129,7 @@ test('R18: die Bildmarke ist docs/logo.svg - eine Quelle, feste Farben, beide St
   // Beide Stellen nehmen die eine Quelle, und keine baut die Marke daneben.
   const router = read('../public/router.js');
   assert.match(router, /logomark\.insertAdjacentHTML\('beforeend', brandMarkSvg\(\)\);/, 'die Seitenleiste nimmt die eine Marke');
-  assert.match(ui, /import \{ brandMarkSvg \} from '\/utils\/brand-mark\.js';/);
+  assert.match(read('../public/utils/family-portrait.js'), /import \{ brandMarkSvg \} from '\/utils\/brand-mark\.js';/);
   for (const [name, src] of [['router.js', router], ['auth-ui.js', ui]]) {
     assert.doesNotMatch(src, /<circle|createElementNS\([^)]*\), 'circle'\)|linearGradient/, `${name} baut keine eigene Marke`);
   }
