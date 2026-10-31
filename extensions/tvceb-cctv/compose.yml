@@ -1,0 +1,29 @@
+services:
+  tvceb-cctv:
+    build: ./service
+    image: tvceb-cctv:1.0.0
+    container_name: tvceb-cctv
+    restart: unless-stopped
+    read_only: true
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    mem_limit: 768m
+    pids_limit: 192
+    environment:
+      YUVOMI_INTERNAL_URL: http://tvceb:3000
+      RTSP_CONFIG_FILE: /run/secrets/rtsp_config
+      CCTV_ADMIN_ONLY: "true"
+      CCTV_CAMERA_IDS: ${CCTV_CAMERA_IDS:-}
+    secrets: [rtsp_config]
+    ports: ["192.168.8.20:3246:3020"]
+    networks: [tvceb]
+    logging:
+      driver: json-file
+      options: { max-size: 5m, max-file: "2" }
+networks:
+  tvceb:
+    external: true
+    name: tvceb-yuvomi_default
+secrets:
+  rtsp_config:
+    file: ./secrets/rtsp.json

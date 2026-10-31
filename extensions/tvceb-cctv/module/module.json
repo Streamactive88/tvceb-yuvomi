@@ -1,0 +1,18 @@
+{
+  "manifestVersion": 1,
+  "id": "tvceb-cctv",
+  "name": "CCTV Cameras",
+  "version": "1.0.0",
+  "description": "Read-only RTSP and Synology Surveillance Station camera snapshots.",
+  "entry": "index.js",
+  "style": "style.css",
+  "icon": "cctv",
+  "accent": "#168A83",
+  "menu": { "show": true, "label": "CCTV Cameras", "labelKey": "menu", "icon": "cctv", "order": 120 },
+  "page": { "composition": "dashboard", "width": "wide", "navigation": "standard", "responsive": "standard" },
+  "i18n": { "defaultLocale": "en" },
+  "capabilities": {
+    "permissions": { "module": { "label": "CCTV Cameras", "labelKey": "menu", "icon": "cctv" } },
+    "api": { "prefix": "/api/extensions/tvceb-cctv" }
+  }
+}

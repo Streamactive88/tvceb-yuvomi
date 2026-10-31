@@ -1537,7 +1537,7 @@ test('navigation sections match the grouped desktop information architecture', (
   // und stehen unter Planen, nicht mehr unter Haushalt.
   assert.equal(moduleSection('rewards'), NAV_SECTION.plan);
   assert.equal(moduleSection('schedule'), NAV_SECTION.plan);
-  assert.equal(moduleSection('contacts'), NAV_SECTION.people);
+  assert.equal(moduleSection('contacts'), NAV_SECTION.plan);
   assert.equal(moduleSection('birthdays'), NAV_SECTION.people);
   assert.equal(moduleSection('health'), NAV_SECTION.people);
   assert.equal(moduleSection('budget'), NAV_SECTION.finance);
@@ -1553,16 +1553,15 @@ test('navigation sections match the grouped desktop information architecture', (
 // Critique G0 S-P2-3): der Kopf "Finanzen" ueber Budget allein schob die Zeile
 // bei 390x844 unter die Falz. Das Blatt liest jetzt dieselbe Regel wie die
 // Seitenleiste, gezaehlt an SEINER Liste.
-test('R23 D13: auch im Mehr-Blatt bekommt eine Sektion erst ab zwei Eintraegen einen Kopf', async () => {
+test('TVCEB keeps the Finance group visible for its Budget entry', async () => {
   const { navSectionLabelKey } = await import('../public/settings/module-order.js');
-  assert.equal(navSectionLabelKey(NAV_SECTION.finance, 1, { standalone: true }), null,
-    'kein Sonderweg mehr: Budget allein steht auch im Blatt ohne "Finanzen"');
+  assert.equal(navSectionLabelKey(NAV_SECTION.finance, 1, { standalone: true }), 'nav.sectionFinance');
   assert.equal(navSectionLabelKey.length, 2, 'die Regel kennt keine Option mehr');
 });
 
 test('R19: eine Sektion mit nur einem Eintrag hat keinen Namen in der Navigation', async () => {
   const { navSectionLabelKey, navSectionEntryCounts } = await import('../public/settings/module-order.js');
-  assert.equal(navSectionLabelKey(NAV_SECTION.finance, 1), null, 'Budget allein: kein "Finanzen"');
+  assert.equal(navSectionLabelKey(NAV_SECTION.finance, 1), 'nav.sectionFinance');
   assert.equal(navSectionLabelKey(NAV_SECTION.finance, 2), 'nav.sectionFinance');
   assert.equal(navSectionLabelKey(NAV_SECTION.plan, 5), 'nav.sectionPlan');
   assert.equal(navSectionLabelKey(NAV_SECTION.overview, 3), null, 'die Uebersicht ist die Wurzel');
@@ -1604,11 +1603,11 @@ test('desktop navigation order is applied only inside each section', () => {
     [
       { module: 'dashboard' },
       { module: 'tasks' },
+      { module: 'contacts' },
       { module: 'calendar' },
       { module: 'notes' },
       // contacts (Menschen) steht vor budget (Finanzen) — Sektions-Reihenfolge
       // schlägt die gespeicherte Modul-Ordnung, die nur innerhalb einer Sektion gilt.
-      { module: 'contacts' },
       { module: 'budget' },
       { module: 'third-party-weather-station' },
       { module: 'settings' },
@@ -3325,11 +3324,11 @@ test('R14: Modulblaetter stehen in der Reihenfolge der Seitenleiste', async () =
   // R19 (Ulas 2026-10-16): Planen = Kalender, Aufgaben, Belohnungen, Notizen,
   // Schichtplan. Notizen haben kein eigenes Modulblatt.
   // R23 D14: die Kalender-Synchronisation steht als zweites Blatt des Kalenders direkt dahinter.
-  assert.deepEqual(mods, ['dashboard', 'calendar', 'calendar', 'tasks', 'rewards', 'schedule', 'kitchen', 'housekeeping', 'waste', 'documents',
-    'inventory', 'contacts', 'health', 'budget'], 'ohne eigene Anordnung genau wie die Seitenleiste (gemessen 1440)');
+  assert.deepEqual(mods, ['dashboard', 'tasks', 'calendar', 'calendar', 'rewards', 'contacts', 'schedule', 'kitchen', 'housekeeping', 'waste', 'documents',
+    'inventory', 'health', 'budget'], 'family module settings follow the sidebar order');
   const pos = (id) => mods.indexOf(id);
   assert.equal(mods[0], 'dashboard', 'die Uebersicht fuehrt wie in der Seitenleiste');
-  assert.ok(pos('tasks') < pos('kitchen') && pos('kitchen') < pos('contacts') && pos('contacts') < pos('budget'),
+  assert.ok(pos('tasks') < pos('contacts') && pos('contacts') < pos('kitchen') && pos('kitchen') < pos('health') && pos('health') < pos('budget'),
     `Planen, Haushalt, Menschen, Finanzen: ${mods}`);
   assert.ok(pos('health') < pos('budget'), 'Gesundheit (Menschen) vor Budget (Finanzen)');
   const custom = ids(['tasks', 'schedule', 'calendar', 'rewards', 'kitchen']).slice(2, -1);
