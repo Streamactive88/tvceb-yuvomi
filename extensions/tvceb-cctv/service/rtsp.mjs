@@ -2,16 +2,28 @@ import { spawn } from 'node:child_process';
 import { CameraError } from './synology.mjs';
 
 // Only a server-owned file supplies RTSP targets. HTTP callers supply a channel ID.
-export function createRtsp({ config, spawnProcess = spawn, idleMs = 30000, frameTimeoutMs = 20000 }) {
+export function createRtsp({ config, allowedIds = [], maxStreams = 4, spawnProcess = spawn, idleMs = 30000, frameTimeoutMs = 20000 }) {
   if (!config || !Array.isArray(config.cameras)) throw new Error('RTSP configuration needs a cameras array.');
+  if (!Number.isSafeInteger(maxStreams) || maxStreams < 1 || maxStreams > 32) throw Error('Invalid decoder limit.');
+  if (!Array.isArray(allowedIds) || allowedIds.some(id => !/^(0|[1-9][0-9]*)$/.test(String(id)))) throw Error('Invalid camera allowlist.');
   const cameras = config.cameras.map(camera => {
     const url = new URL(camera.url);
     if (!['rtsp:', 'rtsps:'].includes(url.protocol) || !Number.isSafeInteger(camera.id) || camera.id < 0) throw new Error('Invalid RTSP camera configuration.');
+    if (url.pathname === '/cam/realmonitor') url.searchParams.set('subtype', '1');
     return { id: camera.id, name: String(camera.name || `Channel ${camera.id}`).slice(0, 160), url: url.href };
   });
   if (cameras.length > 32 || new Set(cameras.map(camera => camera.id)).size !== cameras.length) throw new Error('Use at most 32 distinct camera IDs.');
+  const visibleCameras = allowedIds.length ? cameras.filter(camera => allowedIds.map(String).includes(String(camera.id))) : cameras;
   const streams = new Map();
   function start(camera) {
+    if (streams.size >= maxStreams) {
+      const idle = [...streams.entries()].find(([,state]) => state.waiters.size === 0);
+      if (!idle) throw new CameraError('Camera previews are busy. Try again shortly.', 503);
+      const [oldId, old] = idle;
+      clearTimeout(old.idle);
+      for (const waiter of old.waiters) waiter.reject(new CameraError('Camera preview paused. Try again.', 503));
+      old.waiters.clear(); streams.delete(oldId); old.process.kill('SIGKILL');
+    }
     const state = { bytes: null, time: 0, buffer: Buffer.alloc(0), waiters: new Set(), idle: null, stopped: false };
     const process = spawnProcess('ffmpeg', ['-hide_banner', '-loglevel', 'error', '-nostdin', '-rtsp_transport', 'tcp',
       '-timeout', '12000000', '-threads', '1', '-i', camera.url, '-an', '-sn', '-dn', '-filter_threads', '1',
@@ -19,7 +31,8 @@ export function createRtsp({ config, spawnProcess = spawn, idleMs = 30000, frame
       '-threads', '1', '-q:v', '5', '-f', 'image2pipe', '-vcodec', 'mjpeg', 'pipe:1'], { stdio: ['ignore', 'pipe', 'ignore'] });
     state.process = process;
     const failed = () => {
-      state.stopped = true; clearTimeout(state.idle); streams.delete(camera.id);
+      state.stopped = true; clearTimeout(state.idle);
+      if (streams.get(camera.id) === state) streams.delete(camera.id);
       for (const waiter of state.waiters) waiter.reject(new CameraError('Camera unavailable. Check its RTSP connection and channel.'));
       state.waiters.clear();
     };
@@ -43,7 +56,7 @@ export function createRtsp({ config, spawnProcess = spawn, idleMs = 30000, frame
     return state;
   }
   async function snapshot(id) {
-    const camera = cameras.find(camera => camera.id === id);
+    const camera = visibleCameras.find(camera => camera.id === id);
     if (!camera) throw new CameraError('Camera not found.', 404);
     const state = streams.get(id) || start(camera);
     clearTimeout(state.idle);
@@ -60,5 +73,5 @@ export function createRtsp({ config, spawnProcess = spawn, idleMs = 30000, frame
     for (const state of streams.values()) { clearTimeout(state.idle); state.process.kill('SIGKILL'); }
     streams.clear();
   }
-  return { ready: cameras.length > 0, source: 'RTSP cameras', list: async () => cameras.map(({ id, name }) => ({ id, name })), snapshot, close };
+  return { ready: visibleCameras.length > 0, source: 'RTSP cameras', list: async () => visibleCameras.map(({ id, name }) => ({ id, name })), snapshot, close };
 }

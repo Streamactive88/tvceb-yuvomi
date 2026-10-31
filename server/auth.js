@@ -3736,6 +3736,7 @@ router.patch('/users/:id', requireAuth, requireAdmin, csrfMiddleware, async (req
 
       if (newPasswordHash) {
         db.get().prepare('UPDATE users SET password_hash = ? WHERE id = ?').run(newPasswordHash, userId);
+        defaultResetService.revokeForUser(userId);
       }
 
       syncFamilyMemberArtifacts(db.get(), userId, {
@@ -4039,6 +4040,7 @@ router.patch('/me/password', requireAuth, csrfMiddleware, async (req, res) => {
 
     const hash = await hashPassword(new_password);
     db.get().prepare('UPDATE users SET password_hash = ? WHERE id = ?').run(hash, req.authUserId);
+    defaultResetService.revokeForUser(req.authUserId);
 
     invalidateUserSessions(req.authUserId, req.sessionID);
 

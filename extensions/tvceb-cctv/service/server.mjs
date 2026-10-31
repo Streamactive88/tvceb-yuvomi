@@ -75,7 +75,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     try { return fs.readFileSync(process.env[name], 'utf8').replace(/\r?\n$/, ''); }
     catch (error) { if (error.code === 'ENOENT' || !process.env[name]) return ''; throw error; }
   };
-  const synology = process.env.RTSP_CONFIG_FILE ? createRtsp({ config: JSON.parse(fs.readFileSync(process.env.RTSP_CONFIG_FILE, 'utf8')) }) :
+  const synology = process.env.RTSP_CONFIG_FILE ? createRtsp({ config: JSON.parse(fs.readFileSync(process.env.RTSP_CONFIG_FILE, 'utf8')), allowedIds: (process.env.CCTV_CAMERA_IDS || '').split(',').map(id => id.trim()).filter(Boolean) }) :
     createSynology({ baseUrl: process.env.SURVEILLANCE_URL || '', username: secret('SS_USERNAME_FILE'),
       password: secret('SS_PASSWORD_FILE'), allowedIds: (process.env.CCTV_CAMERA_IDS || '').split(',').map(id => id.trim()).filter(Boolean) });
   const server = http.createServer(createHandler({ coreUrl: process.env.YUVOMI_INTERNAL_URL || 'http://tvceb:3000', synology,

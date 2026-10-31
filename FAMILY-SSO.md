@@ -15,10 +15,11 @@ configuration, outside Git.
 TVCEB settings (client credentials belong in the private NAS env file):
 
 ```
-OIDC_ISSUER=https://login.int.s8.net.au/webman/sso
-OIDC_REDIRECT_URI=https://home.int.s8.net.au/api/v1/auth/oidc/callback
+OIDC_ISSUER=https://login.example.invalid/webman/sso
+OIDC_REDIRECT_URI=https://home.example.invalid/api/v1/auth/oidc/callback
 OIDC_SCOPES=openid email groups
-OIDC_ALLOWED_GROUPS=TVceb FamilyGroup
+OIDC_ALLOWED_GROUPS=Family Group
+OIDC_ALLOWED_USERNAMES=parent1,parent2,child1
 OIDC_USE_PROVIDER_EMAIL=false
 OIDC_ALLOW_SIGNUP=true
 # Set OIDC_ALLOWED_USERNAMES to the approved exact NAS usernames.
@@ -33,6 +34,11 @@ rights. Family roles and individual module permissions remain separate settings.
 Provider email matching is disabled because several NAS accounts can share the
 same email address. Existing local administrator accounts must not be linked by email.
 
+Both allowlists are mandatory for Synology family SSO. The group setting is a
+comma-separated list: spaces are preserved inside a name, so `Family Group` is
+one name, while `Family,Group` is two. Confirm the provider's group claim matches
+the complete configured name and deny accounts absent from the username list.
+
 The HTTPS identity route must accept LAN clients only. Its certificate must be
 trusted on the family phones. Those phones and the application containers must
 resolve the internal domain through the LAN DNS server. Never use HTTP or turn
@@ -41,7 +47,7 @@ off TLS validation for the sign-in flow.
 The login proxy uses HTTPS upstream port 8412. Synology's HTTP port 8411
 returns a JavaScript HTTPS redirect and caused a loop behind TLS termination.
 Keep the LAN-only proxy restrictions and trusted public-facing certificate.
-Internal DNS at 192.168.8.253 resolves the family hosts to 192.168.8.254;
+Internal DNS at INTERNAL_DNS_IP resolves the family hosts to PROXY_LAN_IP;
 Eero Custom DNS now uses the internal resolver. Queries through the Eero gateway
 return the LAN proxy for sign-in and photos, without a public IPv6 answer.
 

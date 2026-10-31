@@ -2,6 +2,7 @@ import { api } from '/api.js';
 import { canAccessNavModule, isNavModuleReadOnly } from '/permissions.js';
 import { esc } from '/utils/html.js';
 import { renderPageHeader, renderPageTitle, renderPageBody } from '/utils/page-layout.js';
+import { familyMarkHtml } from '/utils/family-portrait.js';
 
 const item = (name, module, text) => ({ name, module, text, href: `/${module}` });
 export const groups = [
@@ -19,9 +20,9 @@ export const groups = [
   { name: 'People', links: [item('Health', 'health', 'Keep track of health and wellbeing.'), item('Birthdays', 'birthdays', 'See whose birthday is next.')] },
   { name: 'Finance', links: [item('Budget', 'budget', 'Keep track of family spending.')] },
   { name: 'Family apps', links: [
-    { name: 'Photo Album', text: 'Enjoy the family photos in Immich.', href: 'https://photos.int.s8.net.au/albums', external: true },
-    { name: 'Passwords', text: 'Open your family Vaultwarden vault.', href: 'https://vault.int.s8.net.au', external: true },
-    { name: 'Home Assistant', text: 'Open the home dashboard.', href: 'http://192.168.8.20:8123', external: true },
+    { name: 'Photo Album', text: 'Enjoy the family photos in Immich.', href: 'https://photos.example.invalid/albums', external: true },
+    { name: 'Passwords', text: 'Open your family Vaultwarden vault.', href: 'https://vault.example.invalid', external: true },
+    { name: 'Home Assistant', text: 'Open the home dashboard.', href: 'https://assistant.example.invalid', external: true },
   ] },
 ];
 const settings = [
@@ -50,7 +51,7 @@ export async function render(container, { user, signal }) {
   if (signal?.aborted) return;
   const sections = visibleGroups(disabled);
   if (user?.role === 'admin') sections.push({ name: 'Settings', links: settings });
-  container.insertAdjacentHTML('beforeend', renderPageHeader({ title: renderPageTitle('Family menu') }) + renderPageBody({ content: `<div class="family-app-intro"><img src="/assets/family/family.png" width="1402" height="1122" alt="Family illustration" /><div><h2>What would you like to do?</h2><p>Choose a name below to get started.</p></div></div>${sections.map(section).join('')}` }));
+  container.insertAdjacentHTML('beforeend', renderPageHeader({ title: renderPageTitle('Family menu') }) + renderPageBody({ content: `<div class="family-app-intro"><span class="family-app-picture" data-family-mark>${familyMarkHtml()}</span><div><h2>What would you like to do?</h2><p>Choose a name below to get started.</p></div></div>${sections.map(section).join('')}` }));
   container.querySelectorAll('[data-family-link]').forEach(link => {
     link.addEventListener('click', event => {
       if (event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;

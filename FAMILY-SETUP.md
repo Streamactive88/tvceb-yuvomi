@@ -18,8 +18,8 @@ Navigation groups use the built-in modules:
 directory. It links to existing features and separate family services without sharing
 credentials, embedding vault contents or storing their tokens in browser assets.
 
-Private service hostnames are `vault.int.s8.net.au` and `photos.int.s8.net.au`.
-Home Assistant uses its existing local URL, `http://192.168.8.20:8123`.
+Private service hostnames are `vault.example.invalid` and `photos.example.invalid`.
+Home Assistant uses its existing local URL, `https://assistant.example.invalid`.
 The HTTPS proxies were verified on 31 October 2026 with valid certificates and
 WebSocket support. Vaultwarden retains its existing data and disabled public
 registration. Home Assistant retains its existing local sign-in. The services
@@ -49,7 +49,4 @@ Synology family SSO is enabled for TVCEB and Immich. See `FAMILY-SSO.md` for
 access restrictions. TVCEB family sign-in is confirmed; Immich still needs a
 real-account sign-in check.
 
-Validation: the 15 focused original-navigation checks pass. The broader
-navigation suite has two existing failures in Gravatar copy and Health markup,
-outside these changes. Desktop and 390px mobile login views were checked, with
-the local font and family illustration loaded and no horizontal overflow.
+Validation results are recorded in `HARDENING.md`. Private integration URLs must be configured before installing the launcher modules.

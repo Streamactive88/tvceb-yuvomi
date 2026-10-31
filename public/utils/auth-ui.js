@@ -17,6 +17,7 @@
  *   alert ist assertiv) und beides gemischt.
  */
 import { esc } from '/utils/html.js';
+import { familyMarkHtml } from '/utils/family-portrait.js';
 
 const DEFAULT_APP_NAME = 'tvceb';
 const APP_NAME_STORAGE_KEY = 'yuvomi-app-name';
@@ -46,7 +47,7 @@ export function authHeroHtml({ appName = getStoredAppName(), tagline = '', headi
   const tag = heading ? 'h1' : 'p';
   return `
       <div class="auth-hero${heading ? '' : ' auth-hero--compact'}">
-        <span class="auth-hero__mark" aria-hidden="true"><img class="family-portrait" src="/assets/family/family.png" alt="" width="1402" height="1122" /></span>
+        <span class="auth-hero__mark" aria-hidden="true" data-family-mark>${familyMarkHtml()}</span>
         <${tag} class="auth-hero__title">${esc(appName)}</${tag}>
         ${tagline ? `<p class="auth-hero__tagline">${esc(tagline)}</p>` : ''}
       </div>`;
