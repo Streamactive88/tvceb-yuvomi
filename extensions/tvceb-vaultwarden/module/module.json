@@ -1,0 +1,13 @@
+{
+  "manifestVersion": 1,
+  "id": "tvceb-vaultwarden",
+  "name": "Vaultwarden",
+  "version": "1.0.0",
+  "description": "Open the existing family password vault.",
+  "entry": "index.js",
+  "icon": "key-round",
+  "accent": "#A71D32",
+  "menu": { "show": true, "label": "Vaultwarden", "icon": "key-round", "order": 130 },
+  "page": { "composition": "dashboard", "width": "content", "navigation": "standard", "responsive": "standard" },
+  "capabilities": { "permissions": { "module": { "label": "Vaultwarden", "icon": "key-round" } } }
+}

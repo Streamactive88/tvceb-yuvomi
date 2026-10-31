@@ -45,6 +45,7 @@ import {
   describeOidcError,
   requestedOidcScope,
   oidcIdentityAllowed,
+  oidcProfileEmail,
 } from './services/oidc.js';
 import { emailService as defaultEmailService } from './services/email.js';
 import { passwordResetService as defaultResetService } from './services/password-reset.js';
@@ -2591,7 +2592,7 @@ router.get('/oidc/callback', refuseWhileRestoring, async (req, res) => {
       // iss stammt aus dem validierten ID-Token und ist gegen die Discovery-Metadaten
       // geprüft, also verlässlicher als die konfigurierte OIDC_ISSUER-URL
       iss:                claims.iss,
-      email:              userinfo.email,
+      email:              oidcProfileEmail(userinfo),
       // email_verified kann je nach Provider im UserInfo oder im ID-Token stehen
       email_verified:     userinfo.email_verified ?? claims.email_verified,
       name:               userinfo.name,

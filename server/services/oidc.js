@@ -74,6 +74,10 @@ export function isOidcSignupAllowed() {
   return process.env.OIDC_ALLOW_SIGNUP !== 'false';
 }
 
+export function oidcProfileEmail(userinfo) {
+  return process.env.OIDC_USE_PROVIDER_EMAIL === 'false' ? undefined : userinfo?.email;
+}
+
 const configuredList = value => (value ?? '').split(',').map(item => item.trim()).filter(Boolean);
 
 // Synology's OIDC provider uses username/groups and does not offer profile.

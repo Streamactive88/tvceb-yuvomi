@@ -1,0 +1,3 @@
+FROM ghcr.io/immich-app/immich-server@sha256:485d546a2e31d6a8b4db8423fcba5c109de8c218d93410af115fd1ccfc4352a6
+COPY policy.mjs /opt/tvceb-family-sso/policy.mjs
+COPY patched-oauth.repository.js /usr/src/app/server/dist/repositories/oauth.repository.js

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { oidcIdentityAllowed, requestedOidcScope } from '../server/services/oidc.js';
-const keys = ['OIDC_ALLOWED_GROUPS', 'OIDC_ALLOWED_USERNAMES', 'OIDC_SCOPES'];
+import { oidcIdentityAllowed, requestedOidcScope, oidcProfileEmail } from '../server/services/oidc.js';
+const keys = ['OIDC_ALLOWED_GROUPS', 'OIDC_ALLOWED_USERNAMES', 'OIDC_SCOPES', 'OIDC_USE_PROVIDER_EMAIL'];
 const original = Object.fromEntries(keys.map(k => [k, process.env[k]]));
 test.after(() => { for (const k of keys) if (original[k] === undefined) delete process.env[k]; else process.env[k] = original[k]; });
 test('SSO family policy requires the exact group and allowed person', () => {
@@ -17,4 +17,10 @@ test('Synology scope excludes unsupported profile and includes groups', () => {
   assert.equal(requestedOidcScope(),'openid email groups');
   process.env.OIDC_SCOPES = 'email';
   assert.throws(requestedOidcScope,/openid/);
+});
+test('a shared NAS email cannot match an existing account when provider email use is disabled', () => {
+  process.env.OIDC_USE_PROVIDER_EMAIL = 'false';
+  assert.equal(oidcProfileEmail({email:'admin@example.test'}), undefined);
+  delete process.env.OIDC_USE_PROVIDER_EMAIL;
+  assert.equal(oidcProfileEmail({email:'member@example.test'}), 'member@example.test');
 });

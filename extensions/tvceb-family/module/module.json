@@ -8,7 +8,7 @@
   "icon": "house-heart",
   "accent": "#A71D32",
   "menu": {
-    "show": true,
+    "show": false,
     "label": "Family menu",
     "icon": "house-heart",
     "order": 10

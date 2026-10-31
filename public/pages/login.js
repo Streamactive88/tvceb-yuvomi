@@ -147,6 +147,7 @@ export async function render(container) {
     // benennt (GHSA-6pmj-w42g-g6qv): beide nennen den Weg, der weiterhilft,
     // statt "bitte erneut versuchen" - ein neuer Versuch endet genauso.
     const ssoMessage = new Map([
+      ['oidc_access_denied', () => t('login.ssoAccessDenied')],
       ['oidc_signup_disabled', () => t('login.ssoNoAccount')],
       ['oidc_sign_in_blocked', () => t('login.accountCannotSignIn')],
       ['oidc_email_ambiguous', () => t('login.ssoEmailAmbiguous')],

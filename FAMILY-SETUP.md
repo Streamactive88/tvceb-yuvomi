@@ -30,20 +30,26 @@ introduced. Documents use the existing persistent `/documents` mount. Photo-albu
 screensaver access additionally needs an Immich API key and selected album, configured
 in Settings → Household → Integrations. Never put that key into the module or Git.
 
-Deployment uses `tvceb:2.82.0-family2`. Schedule, Inventory and Waste collection
+Deployment uses `tvceb:2.82.0-original-menu1`. Schedule, Inventory and Waste collection
 are enabled with the other requested built-in modules. Immich's existing Family
 Album is selected; adding its private read-only API key is still required for
 the portal's photo screensaver. Home Assistant's private sign-in remains a user
 step. The Family Apps module is installed in the persistent modules directory.
 
-Version 1.1.0 labels this entry **Family menu** and lists Plan, Household,
-People, Finance, the connected apps and administrator Settings. Links respect
-household module switches and each member's existing permissions. Read-only
-access is labelled; ordinary members do not see administrator settings.
+Navigation now follows the original upstream menu order and grouping. The
+custom Family menu is hidden from navigation; its page remains available by URL.
+All built-in modules are enabled and menu visibility/order overrides are reset.
+Previous menu preferences are saved privately on the NAS for rollback.
+**CCTV Cameras** and **Vaultwarden** are separate custom module entries.
+CCTV retains its read-only service and existing account restrictions.
+Vaultwarden opens the existing family vault with its own authentication.
+Existing family roles and data permissions are preserved.
 The shared **Family Groceries** list and a **Family** document folder are ready.
-Synology SSO Server is installed; family SSO is not yet enabled or verified.
+Synology family SSO is enabled for TVCEB and Immich. See `FAMILY-SSO.md` for
+access restrictions. TVCEB family sign-in is confirmed; Immich still needs a
+real-account sign-in check.
 
-Validation: the 16 focused navigation/module-order checks pass. The broader
+Validation: the 15 focused original-navigation checks pass. The broader
 navigation suite has two existing failures in Gravatar copy and Health markup,
 outside these changes. Desktop and 390px mobile login views were checked, with
 the local font and family illustration loaded and no horizontal overflow.

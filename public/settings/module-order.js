@@ -20,12 +20,12 @@ export const KITCHEN_CHILD_IDS = Object.freeze(['meals', 'recipes', 'shopping', 
 // Import, der ihre Test-Ladbarkeit kostet.
 export const BUILT_IN_MODULES = Object.freeze([
   { id: 'dashboard', labelKey: 'nav.dashboard', locked: true },
-  { id: 'tasks', labelKey: 'nav.tasks' },
   { id: 'calendar', labelKey: 'nav.calendar' },
+  { id: 'tasks', labelKey: 'nav.tasks' },
   { id: 'rewards', labelKey: 'nav.rewards' },
   { id: 'notes', labelKey: 'nav.notes' },
-  { id: 'contacts', labelKey: 'nav.contacts' },
   { id: 'schedule', labelKey: 'nav.schedule' },
+  { id: 'contacts', labelKey: 'nav.contacts' },
   { id: 'birthdays', labelKey: 'nav.birthdays' },
   { id: 'budget', labelKey: 'nav.budget' },
   { id: 'documents', labelKey: 'nav.documents' },
@@ -121,7 +121,6 @@ export function navSectionEntryCounts(items = []) {
  */
 export function navSectionLabelKey(section, entryCount) {
   if (section === NAV_SECTION.overview) return null;
-  if (section === NAV_SECTION.finance && entryCount >= 1) return NAV_SECTION_LABEL_KEYS[section];
   if (!(entryCount >= 2)) return null;
   return NAV_SECTION_LABEL_KEYS[section] ?? null;
 }
@@ -137,17 +136,13 @@ const KITCHEN_CHILD_ID_SET = new Set(KITCHEN_CHILD_IDS);
 // Aufgaben, obwohl er das seltenste Ziel der Gruppe ist. Die Reihenfolge
 // INNERHALB der Gruppe ist die von BUILT_IN_MODULES bzw. der Routerliste; eine
 // eigene `module_order` des Nutzers bleibt davon unberuehrt.
-const PLAN_MODULE_IDS = new Set(['tasks', 'calendar', 'rewards', 'notes', 'contacts', 'schedule']);
+const PLAN_MODULE_IDS = new Set(['calendar', 'tasks', 'rewards', 'notes', 'schedule']);
 // Ehemals ein einziger „Zuhause"-Sammeltopf (8 Module) — aufgeteilt in semantische
 // Gruppen ≤5, damit die Sidebar-Sektion eine Bedeutung trägt statt „nicht Plan/Übersicht".
 const HOUSEHOLD_MODULE_IDS = new Set(['kitchen', 'meals', 'recipes', 'shopping', 'housekeeping', 'waste', 'documents', 'inventory']);
-const PEOPLE_MODULE_IDS = new Set(['health', 'birthdays']);
+const PEOPLE_MODULE_IDS = new Set(['contacts', 'birthdays', 'health']);
 const FINANCE_MODULE_IDS = new Set(['budget']);
 const MOBILE_NAV_ID_RE = /^[a-z0-9][a-z0-9-]*$/;
-const FAMILY_MODULE_ORDER = new Map([
-  'dashboard', 'tasks', 'calendar', 'rewards', 'notes', 'contacts', 'schedule',
-  'kitchen', 'housekeeping', 'waste', 'documents', 'inventory', 'health', 'birthdays', 'budget', 'settings',
-].map((id, index) => [id, index]));
 
 function isMobileNavId(id) {
   return (
@@ -218,8 +213,8 @@ export function sortNavigationItems(items = [], order = []) {
 
       const leftOrderId = KITCHEN_CHILD_ID_SET.has(leftId) ? 'kitchen' : leftId;
       const rightOrderId = KITCHEN_CHILD_ID_SET.has(rightId) ? 'kitchen' : rightId;
-      const leftRank = orderIndex.get(leftOrderId) ?? (orderIndex.size + (FAMILY_MODULE_ORDER.get(leftOrderId) ?? 1000));
-      const rightRank = orderIndex.get(rightOrderId) ?? (orderIndex.size + (FAMILY_MODULE_ORDER.get(rightOrderId) ?? 1000));
+      const leftRank = orderIndex.get(leftOrderId) ?? Number.MAX_SAFE_INTEGER;
+      const rightRank = orderIndex.get(rightOrderId) ?? Number.MAX_SAFE_INTEGER;
       return leftRank - rightRank || left.index - right.index;
     })
     .map(({ item }) => item);
