@@ -36,6 +36,13 @@ Album is selected; adding its private read-only API key is still required for
 the portal's photo screensaver. Home Assistant's private sign-in remains a user
 step. The Family Apps module is installed in the persistent modules directory.
 
+Version 1.1.0 labels this entry **Family menu** and lists Plan, Household,
+People, Finance, the connected apps and administrator Settings. Links respect
+household module switches and each member's existing permissions. Read-only
+access is labelled; ordinary members do not see administrator settings.
+The shared **Family Groceries** list and a **Family** document folder are ready.
+Synology SSO Server is installed; family SSO is not yet enabled or verified.
+
 Validation: the 16 focused navigation/module-order checks pass. The broader
 navigation suite has two existing failures in Gravatar copy and Health markup,
 outside these changes. Desktop and 390px mobile login views were checked, with

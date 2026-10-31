@@ -1,13 +1,30 @@
 {
   "manifestVersion": 1,
   "id": "tvceb-family",
-  "name": "Family Apps",
-  "version": "1.0.0",
+  "name": "Family menu",
+  "version": "1.1.0",
   "description": "Family shortcuts for groceries, documents, photos, passwords and home automation.",
   "entry": "index.js",
   "icon": "house-heart",
   "accent": "#A71D32",
-  "menu": { "show": true, "label": "Family Apps", "icon": "house-heart", "order": 10 },
-  "page": { "composition": "dashboard", "width": "wide", "navigation": "standard", "responsive": "standard" },
-  "capabilities": { "permissions": { "module": { "label": "Family Apps", "icon": "house-heart" } } }
+  "menu": {
+    "show": true,
+    "label": "Family menu",
+    "icon": "house-heart",
+    "order": 10
+  },
+  "page": {
+    "composition": "dashboard",
+    "width": "wide",
+    "navigation": "standard",
+    "responsive": "standard"
+  },
+  "capabilities": {
+    "permissions": {
+      "module": {
+        "label": "Family Apps",
+        "icon": "house-heart"
+      }
+    }
+  }
 }

@@ -1,27 +1,60 @@
+import { api } from '/api.js';
+import { canAccessNavModule, isNavModuleReadOnly } from '/permissions.js';
 import { esc } from '/utils/html.js';
 import { renderPageHeader, renderPageTitle, renderPageBody } from '/utils/page-layout.js';
 
-const links = [
-  { name: 'Groceries', text: 'The shared family shopping list.', href: '/shopping' },
-  { name: 'Documents', text: 'Keep family documents together.', href: '/documents' },
-  { name: 'Kitchen', text: 'Meals, recipes, shopping and pantry.', href: '/meals' },
-  { name: 'Immich Photo Album', text: 'Browse family photos and albums.', href: 'https://photos.int.s8.net.au/albums', external: true },
-  { name: 'Family Vault', text: 'Open Vaultwarden to manage your passwords.', href: 'https://vault.int.s8.net.au', external: true },
-  { name: 'Home Assistant', text: 'Open your home dashboard.', href: 'http://192.168.8.20:8123', external: true },
+const item = (name, module, text) => ({ name, module, text, href: `/${module}` });
+export const groups = [
+  { name: 'Plan', links: [
+    item('Tasks', 'tasks', 'See what needs doing.'), item('Calendar', 'calendar', 'See what is coming up.'),
+    item('Rewards', 'rewards', 'Celebrate your progress.'), item('Notes', 'notes', 'Write down something to remember.'),
+    item('Contacts', 'contacts', 'Find someone’s contact details.'), item('Schedule', 'schedule', 'Check the family schedule.'),
+  ] },
+  { name: 'Household', links: [
+    item('Meals', 'meals', 'See what is for dinner.'), item('Recipes', 'recipes', 'Find something to cook.'),
+    item('Shopping', 'shopping', 'Add groceries to the shared list.'), item('Pantry', 'pantry', 'Check what is in the kitchen.'),
+    item('Housekeeping', 'housekeeping', 'See the household jobs.'), item('Waste collection', 'waste', 'Check which bin goes out next.'),
+    item('Documents', 'documents', 'Find a family document.'), item('Inventory', 'inventory', 'Find things around the house.'),
+  ] },
+  { name: 'People', links: [item('Health', 'health', 'Keep track of health and wellbeing.'), item('Birthdays', 'birthdays', 'See whose birthday is next.')] },
+  { name: 'Finance', links: [item('Budget', 'budget', 'Keep track of family spending.')] },
+  { name: 'Family apps', links: [
+    { name: 'Photo Album', text: 'Enjoy the family photos in Immich.', href: 'https://photos.int.s8.net.au/albums', external: true },
+    { name: 'Passwords', text: 'Open your family Vaultwarden vault.', href: 'https://vault.int.s8.net.au', external: true },
+    { name: 'Home Assistant', text: 'Open the home dashboard.', href: 'http://192.168.8.20:8123', external: true },
+  ] },
 ];
 const settings = [
-  { name: 'Family', text: 'Family members and roles.', href: '/settings/admin/family' },
-  { name: 'Reminders', text: 'Tasks and reminder synchronisation.', href: '/settings/modules/tasks?section=sync-reminders' },
-  { name: 'API Tokens', text: 'Manage access for integrations.', href: '/settings/admin/api' },
-  { name: 'Backup', text: 'Back up and restore family data.', href: '/settings/admin/backup' },
+  { name: 'Family', text: 'Manage family members.', href: '/settings/admin/family' },
+  { name: 'Reminders', text: 'Set up task reminders.', href: '/settings/modules/tasks?section=sync-reminders' },
+  { name: 'API Tokens', text: 'Connect another app.', href: '/settings/admin/api' },
+  { name: 'Backup', text: 'Save or restore family data.', href: '/settings/admin/backup' },
+  { name: 'Member access', text: 'Choose what each family member can use.', href: '/settings/admin/permissions' },
 ];
-const card = link => `<a class="family-app-link" href="${esc(link.href)}"${link.external ? ' target="_blank" rel="noopener noreferrer"' : ' data-family-link'}><strong>${esc(link.name)}${link.external ? ' ↗' : ''}</strong><span>${esc(link.text)}</span></a>`;
-
-export function render(container, { user, signal }) {
+export function visibleGroups(disabled = []) {
+  const off = new Set(disabled);
+  return groups.map(group => ({ ...group, links: group.links.filter(link =>
+    !link.module || (!off.has(link.module) && canAccessNavModule(link.module)))
+  })).filter(group => group.links.length);
+}
+const card = link => `<a class="family-app-link" href="${esc(link.href)}"${link.external ? ' target="_blank" rel="noopener noreferrer"' : ' data-family-link'}><strong>${esc(link.name)}${link.external ? ' ↗' : ''}</strong><span>${esc(link.text)}${link.module && isNavModuleReadOnly(link.module) ? ' · View only' : ''}</span></a>`;
+const section = group => `<section aria-label="${esc(group.name)}"><h2 class="family-app-group">${esc(group.name)}</h2>${group.name === 'Household' ? '<p>Kitchen: Meals · Recipes · Shopping · Pantry</p>' : ''}<div class="family-app-links">${group.links.map(card).join('')}</div></section>`;
+export async function render(container, { user, signal }) {
   container.replaceChildren();
-  container.insertAdjacentHTML('beforeend', renderPageHeader({ title: renderPageTitle('Family Apps') }) +
-    renderPageBody({ content: `<section aria-label="Family apps"><div class="family-app-intro"><img src="/assets/family/family.png" width="1402" height="1122" alt="Family illustration" /><div><h2>Our family, together</h2><p>Your shopping, documents, photos and home tools in one place. Each connected app keeps its own secure sign-in.</p></div></div><div class="family-app-links">${links.map(card).join('')}</div>${user?.role === 'admin' ? `<h2 class="family-app-group">Settings</h2><div class="family-app-links">${settings.map(card).join('')}</div>` : ''}</section>` }));
+  let disabled;
+  try { disabled = (await api.get('/preferences')).data.disabled_modules ?? []; }
+  catch {
+    if (!signal?.aborted) container.insertAdjacentHTML('beforeend', renderPageHeader({ title: renderPageTitle('Family menu') }) + renderPageBody({ content: '<p>We could not load your family menu. Please try again.</p>' }));
+    return;
+  }
+  if (signal?.aborted) return;
+  const sections = visibleGroups(disabled);
+  if (user?.role === 'admin') sections.push({ name: 'Settings', links: settings });
+  container.insertAdjacentHTML('beforeend', renderPageHeader({ title: renderPageTitle('Family menu') }) + renderPageBody({ content: `<div class="family-app-intro"><img src="/assets/family/family.png" width="1402" height="1122" alt="Family illustration" /><div><h2>What would you like to do?</h2><p>Choose a name below to get started.</p></div></div>${sections.map(section).join('')}` }));
   container.querySelectorAll('[data-family-link]').forEach(link => {
-    link.addEventListener('click', event => { event.preventDefault(); window.yuvomi.navigate(link.getAttribute('href')); }, { signal });
+    link.addEventListener('click', event => {
+      if (event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+      event.preventDefault(); window.yuvomi.navigate(link.getAttribute('href'));
+    }, { signal });
   });
 }
