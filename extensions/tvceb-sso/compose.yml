@@ -1,0 +1,49 @@
+services:
+  family-sso-db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+    secrets: [postgres_password]
+    volumes: [family-sso-postgres:/var/lib/postgresql/data]
+    networks: [sso]
+    healthcheck:
+      test: [CMD-SHELL, pg_isready -U keycloak -d keycloak]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+  family-sso:
+    image: quay.io/keycloak/keycloak:26.8.1@sha256:3f3c5f8e03c614774b4bd9173b88391fefa4153bfc010d8012d59ad825377332
+    restart: unless-stopped
+    entrypoint: [/bin/bash, -ec]
+    command:
+      - |
+        export KC_DB_PASSWORD="$$(cat /run/secrets/postgres_password)"
+        export KC_BOOTSTRAP_ADMIN_PASSWORD="$$(cat /run/secrets/bootstrap_password)"
+        exec /opt/keycloak/bin/kc.sh start --import-realm
+    depends_on:
+      family-sso-db: {condition: service_healthy}
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://family-sso-db:5432/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_BOOTSTRAP_ADMIN_USERNAME: family-sso-operator
+      KC_HOSTNAME: ${FAMILY_SSO_ORIGIN:?Set the new private HTTPS broker origin}
+      KC_HTTP_ENABLED: "true"
+      KC_PROXY_HEADERS: xforwarded
+      KC_HEALTH_ENABLED: "true"
+      JAVA_OPTS_KC_HEAP: -XX:MaxRAMPercentage=65
+    mem_limit: 1536m
+    secrets: [postgres_password, bootstrap_password]
+    volumes: ["./generated/tvceb-family-realm.json:/opt/keycloak/data/import/tvceb-family-realm.json:ro"]
+    ports: ["127.0.0.1:3248:8080"]
+    networks: [sso]
+secrets:
+  postgres_password: {file: ./generated/postgres-password}
+  bootstrap_password: {file: ./generated/bootstrap-password}
+volumes:
+  family-sso-postgres:
+networks:
+  sso:

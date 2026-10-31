@@ -1,0 +1,8 @@
+{
+  "manifestVersion": 1, "id": "tvceb-whatsapp", "name": "Family messages", "version": "1.0.0",
+  "description": "Open the official WhatsApp Web family group with your own linked phone.",
+  "entry": "index.js", "icon": "message-circle", "accent": "#A71D32",
+  "menu": { "show": true, "label": "Family messages", "icon": "message-circle", "order": 30 },
+  "page": { "composition": "reading", "width": "reading", "navigation": "standard", "responsive": "standard" },
+  "capabilities": { "permissions": { "module": { "label": "Family messages", "icon": "message-circle" } } }
+}

@@ -5,6 +5,7 @@
  */
 
 import { api, auth, isAbortError } from '/api.js';
+import { simplifyFamilyNavigation } from '/utils/family-navigation.js';
 import { canAccessNavModule, navModuleAccess, setExtensionNavMap } from '/permissions.js';
 import { setExtensionModules, selectThirdPartyModuleList } from '/utils/extension-widgets.js';
 import { initExtensionI18n, moduleDisplayLabel, reloadExtensionLocales } from '/utils/extension-i18n.js';
@@ -650,6 +651,7 @@ let _pageController = null;
 // Benachrichtigung, ein Dashboard-Widget oder die Suche. Wer entziehen will,
 // nimmt die Rechte (#467); wer aufraeumen will, blendet aus.
 let _hiddenModules = new Set();
+let _familySimpleNavigation = false;
 let _thirdPartyModules = [];
 let _moduleOrder = [];
 let _mobileNavOrder = [];
@@ -990,6 +992,7 @@ function applyStartPreferences(res) {
     setAppName(res.data.app_name);
     updateBranding();
   }
+  _familySimpleNavigation = res?.data?.family_simple_navigation === true;
   if (Array.isArray(res?.data?.disabled_modules)) {
     routerState._disabledModules = new Set(res.data.disabled_modules);
   }
@@ -4397,7 +4400,7 @@ function navItems({ catalog = false } = {}) {
     ...thirdPartyItems,
   ];
   const ordered = sortNavigationItems(sortable, _moduleOrder);
-  return settings ? [...ordered, settings] : ordered;
+  return simplifyFamilyNavigation(settings ? [...ordered, settings] : ordered, _familySimpleNavigation);
 }
 
 /** Alle Module mit ihren Metadaten - ungefiltert. Fuer Label und Symbol. */
@@ -5322,6 +5325,7 @@ window.addEventListener('popstate', (e) => {
  * Fenster, in dem eine abgeschaltete Route wieder erreichbar waere. */
 function forgetSessionState() {
   routerState.currentUser = null;
+  _familySimpleNavigation = false;
   // Eine ungepruefte Sitzung aus dem Abzug (#2293) endet mit.
   offlineSession.stop();
   routerState._preferencesLoaded = false;

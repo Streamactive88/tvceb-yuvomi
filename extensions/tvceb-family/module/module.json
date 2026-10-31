@@ -1,16 +1,16 @@
 {
   "manifestVersion": 1,
   "id": "tvceb-family",
-  "name": "Family menu",
-  "version": "1.1.0",
-  "description": "Family shortcuts for groceries, documents, photos, passwords and home automation.",
+  "name": "Family home",
+  "version": "2.0.0",
+  "description": "Simple family activities, knowledgebase, messages and private service links.",
   "entry": "index.js",
-  "icon": "house-heart",
+  "icon": "house",
   "accent": "#A71D32",
   "menu": {
-    "show": false,
-    "label": "Family menu",
-    "icon": "house-heart",
+    "show": true,
+    "label": "Family home",
+    "icon": "house",
     "order": 10
   },
   "page": {
@@ -22,9 +22,18 @@
   "capabilities": {
     "permissions": {
       "module": {
-        "label": "Family Apps",
-        "icon": "house-heart"
+        "label": "Family home",
+        "icon": "house"
       }
+    },
+    "api": {
+      "prefix": "/api/extensions/tvceb-family"
     }
+  },
+  "settings": {
+    "entry": "settings.js",
+    "sections": [
+      "household"
+    ]
   }
 }

@@ -1,0 +1,16 @@
+# Install christiaangoossens/hass-oidc-auth via HACS first.
+# Merge into the existing configuration; retain homeassistant auth for recovery.
+auth_oidc:
+  client_id: homeassistant
+  discovery_url: https://family-login.example.invalid/realms/tvceb-family/.well-known/openid-configuration
+  display_name: TVceb Family
+  roles:
+    user: TVceb Family
+    admin: NO_FAMILY_ACCOUNT_IS_AN_ADMIN
+  features:
+    require_existing_user: true
+    automatic_user_linking: false
+    automatic_person_creation: false
+    default_redirect: false
+# First-time identities deliberately fail until linked by a reviewed migration.
+# See README: do not enable unrestricted username linking to make this work.

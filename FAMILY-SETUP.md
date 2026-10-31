@@ -1,52 +1,53 @@
-# TVCEB family setup
+# Family home candidate
 
-The family theme is in `public/styles/family-theme.css`: red primary controls, gold details,
-accessible light/dark text colours and locally hosted Nunito Sans. The font licence is in
-`public/fonts/nunito-sans/OFL.txt`. The supplied family illustration is deployed privately
-at `public/assets/family/family.png`; it is excluded from Git.
+Status: source prepared; these changes are not installed on the NAS. The red/gold
+family theme and readable Nunito Sans font remain. Family home groups Plan,
+Household, People and Finance, and has shortcuts for photos, messages and guides.
 
-Navigation groups use the built-in modules:
+Install extensions/tvceb-family/module, extensions/tvceb-knowledgebase/module and
+extensions/tvceb-whatsapp/module into persistent module folders named tvceb-family,
+tvceb-knowledgebase and tvceb-whatsapp. Keep existing CCTV and Vaultwarden rights.
+The old custom Immich adapter is removed: the referenced photo installation now uses
+Family Photo Share and PhotoPrism. Preserve photo originals, uploads and album ACLs.
+Clear obsolete Immich screensaver settings privately; the inherited upstream optional
+integration does not mean Immich should be reinstalled.
 
-- Plan: Tasks, Calendar, Rewards, Notes, Contacts, Schedule.
-- Household: Kitchen (Meals, Recipes, Shopping, Pantry), Housekeeping, Waste collection,
-  Documents, Inventory.
-- People: Health, Birthdays.
-- Finance: Budget.
-- Settings: Family, Reminders, API Tokens, Backup, with direct shortcuts in Family Apps.
+## Family service
 
-`extensions/tvceb-family/module/` installs as `tvceb-family/` in the persistent modules
-directory. It links to existing features and separate family services without sharing
-credentials, embedding vault contents or storing their tokens in browser assets.
+Copy extensions/tvceb-family/service-config.example.json to that extension's private
+secrets/family-services.json. Prepare data/ writable by container UID 1000. Set the
+exact HTTPS FAMILY_PUBLIC_ORIGIN and existing TVCEB Docker network in Compose.
+Persistent SQLite settings override the example after first start.
 
-Private service hostnames are `vault.example.invalid` and `photos.example.invalid`.
-Home Assistant uses its existing local URL, `https://assistant.example.invalid`.
-The HTTPS proxies were verified on 31 October 2026 with valid certificates and
-WebSocket support. Vaultwarden retains its existing data and disabled public
-registration. Home Assistant retains its existing local sign-in. The services
-keep their own permissions; the portal provides launchers, not shared sessions.
+Proxy only /api/extensions/tvceb-family/ on the existing portal origin to the private
+sidecar port 3030. Preserve Cookie and Origin, forward HTTPS correctly and do not
+cache. The sample loopback port 3247 is for a host proxy; a containerized proxy
+needs the private Docker network instead. Keep all other portal routing unchanged.
+Never expose the sidecar publicly. It verifies TVCEB sessions with a maximum two-second
+cache and never reads the core database or stores passwords.
 
-Shopping uses tvceb's shared Kitchen shopping lists; no separate grocery database is
-introduced. Documents use the existing persistent `/documents` mount. Photo-album
-screensaver access additionally needs an Immich API key and selected album, configured
-in Settings → Household → Integrations. Never put that key into the module or Git.
+Enable the three modules, then choose Settings -> Modules -> Family home, also
+linked as Family setup on the home page. A system administrator can set service URLs,
+the private WhatsApp group invitation, who can edit guides, the simple menu, member
+display names, family roles and individual module access. Core account/permissions
+APIs enforce these changes; this screen does not grant service administrator rights.
 
-Deployment uses `tvceb:2.82.0-original-menu1`. Schedule, Inventory and Waste collection
-are enabled with the other requested built-in modules. Immich's existing Family
-Album is selected; adding its private read-only API key is still required for
-the portal's photo screensaver. Home Assistant's private sign-in remains a user
-step. The Family Apps module is installed in the persistent modules directory.
+Everyone with Knowledgebase Use / edit access can edit published articles and their
+own pending drafts. Parents publish and archive. Children can submit new articles
+for parent review; other children's drafts remain private. Read-only users cannot
+write. Version checks prevent stale updates. The administrator can instead choose
+parents-only editing. Article text is escaped plain text.
 
-Navigation now follows the original upstream menu order and grouping. The
-custom Family menu is hidden from navigation; its page remains available by URL.
-All built-in modules are enabled and menu visibility/order overrides are reset.
-Previous menu preferences are saved privately on the NAS for rollback.
-**CCTV Cameras** and **Vaultwarden** are separate custom module entries.
-CCTV retains its read-only service and existing account restrictions.
-Vaultwarden opens the existing family vault with its own authentication.
-Existing family roles and data permissions are preserved.
-The shared **Family Groceries** list and a **Family** document folder are ready.
-Synology family SSO is enabled for TVCEB and Immich. See `FAMILY-SSO.md` for
-access restrictions. TVCEB family sign-in is confirmed; Immich still needs a
-real-account sign-in check.
+Family messages defaults to TVceb Family. Short instructions explain using WhatsApp
+on a phone and scanning a QR code to link a computer. A parent can add the official
+private invitation in settings. Each person links their own eligible WhatsApp account;
+TVCEB never receives phone credentials or messages. Log out on shared computers.
 
-Validation results are recorded in `HARDENING.md`. Private integration URLs must be configured before installing the launcher modules.
+The optional simple menu shortens navigation while every permitted activity stays in
+Family home. It falls back to the complete menu if Family home is unavailable.
+
+Back up extensions/tvceb-family/data/family-hub.sqlite separately using a stopped
+service or a SQLite-consistent snapshot. Core TVCEB backups do not include this DB.
+
+See [SSO preparation](extensions/tvceb-sso/README.md) for the broker and adapters.
+Retain current working sign-ins until real-account callback and permission checks pass.

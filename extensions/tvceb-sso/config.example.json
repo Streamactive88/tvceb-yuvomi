@@ -1,0 +1,22 @@
+{
+  "brokerOrigin": "https://family-login.example.invalid",
+  "upstream": {
+    "issuer": "https://nas-login.example.invalid/webman/sso",
+    "authorizationEndpoint": "https://nas-login.example.invalid/webman/sso/SSOOauth.cgi",
+    "tokenEndpoint": "https://nas-login.example.invalid/webman/sso/SSOAccessToken.cgi",
+    "userinfoEndpoint": "https://nas-login.example.invalid/webman/sso/SSOUserInfo.cgi",
+    "jwksUri": "https://nas-login.example.invalid/webman/sso/jwks",
+    "clientId": "REPLACE",
+    "clientSecret": "REPLACE"
+  },
+  "services": {
+    "tvceb": "https://home.example.invalid",
+    "photos": "https://photos.example.invalid",
+    "photoprism": "https://library.example.invalid",
+    "vaultwarden": "https://vault.example.invalid",
+    "homeassistant": "https://assistant.example.invalid"
+  },
+  "members": [
+    {"username":"parent1","upstreamSubject":"REPLACE","email":"parent1@example.invalid","emailVerifiedByAdmin":false,"familyGroupVerifiedByAdmin":false}
+  ]
+}

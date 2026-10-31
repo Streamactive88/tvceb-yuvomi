@@ -1,0 +1,6 @@
+.kb-list { display: grid; gap: .75rem; margin: 1rem 0; }
+.kb-item { text-align: left; padding: 1rem; border: 1px solid var(--color-border); border-radius: .75rem; background: var(--color-surface); color: var(--color-text-primary); }
+.kb-text { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.7; }
+.kb-form { display: grid; gap: .75rem; }
+.kb-form textarea { min-height: 14rem; }
+.kb-actions { display: flex; gap: .75rem; flex-wrap: wrap; margin: 1rem 0; }

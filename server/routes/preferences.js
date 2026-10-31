@@ -629,6 +629,7 @@ router.get('/', (req, res) => {
         // Anordnung und Kopfband der Übersicht - persönlich, mit Haushalts-Fallback (#585).
         ...dashboardPersonalViews(req.authUserId),
         disabled_modules: disabledModules,
+        family_simple_navigation: cfgGet('family_simple_navigation') === '1',
         hidden_modules: hiddenModules,
         module_order: moduleOrder,
         mobile_nav_order: mobileNavOrder,
@@ -716,7 +717,7 @@ router.put('/', (req, res) => {
   try {
     database = db.get();
     database.exec('BEGIN');
-    const { visible_meal_types, meal_type_names, currency, date_format, time_format, week_start, region, timezone, timezone_hint_dismissed, language, app_name, dashboard_widgets, dashboard_today_glance, dashboard_widgets_default, dashboard_today_glance_default, disabled_modules, hidden_modules, module_order, mobile_nav_order, housekeeping_payment_tasks, budget_mode, calendar_default_duration, calendar_default_reminders, calendar_default_assign_me, calendar_default_target, health_cycle_enabled, health_cycle_enabled_user, health_prevention_notify_caregivers, rewards_require_approval, tasks_subtasks_expanded, tasks_default_points, tasks_default_target, schedule_hidden_templates, countdown_grace_days, weather_provider, weather_lat, weather_lon, weather_city, weather_units, weather_auto_locate, weather_user, holiday_country, holiday_subdivision, holiday_group, holiday_show_public, holiday_show_school, holiday_public_color, holiday_school_color } = req.body;
+    const { visible_meal_types, meal_type_names, currency, date_format, time_format, week_start, region, timezone, timezone_hint_dismissed, language, app_name, dashboard_widgets, dashboard_today_glance, dashboard_widgets_default, dashboard_today_glance_default, disabled_modules, family_simple_navigation, hidden_modules, module_order, mobile_nav_order, housekeeping_payment_tasks, budget_mode, calendar_default_duration, calendar_default_reminders, calendar_default_assign_me, calendar_default_target, health_cycle_enabled, health_cycle_enabled_user, health_prevention_notify_caregivers, rewards_require_approval, tasks_subtasks_expanded, tasks_default_points, tasks_default_target, schedule_hidden_templates, countdown_grace_days, weather_provider, weather_lat, weather_lon, weather_city, weather_units, weather_auto_locate, weather_user, holiday_country, holiday_subdivision, holiday_group, holiday_show_public, holiday_show_school, holiday_public_color, holiday_school_color } = req.body;
 
     // Welche Quickstart-Vorlagen der Schichtplan-Schnellstart zeigt - wie
     // disabled_modules haushaltweit und admin-only, nicht wie hidden_modules
@@ -727,6 +728,11 @@ router.put('/', (req, res) => {
     // dann teilweise an, bevor der 403 kam.
     // Seit #1622 nimmt die Transaktion um den Handler so eine Patch ohnehin ganz
     // zurueck; der Check bleibt oben stehen, weil er nichts kostet.
+    if (family_simple_navigation !== undefined) {
+      if (!isAdminRequest(req)) return res.status(403).json({error:'Admin access required.',code:403});
+      if (typeof family_simple_navigation !== 'boolean') return res.status(400).json({error:'family_simple_navigation must be boolean.',code:400});
+      cfgSet('family_simple_navigation',family_simple_navigation?'1':'0');
+    }
     if (schedule_hidden_templates !== undefined) {
       if (!isAdminRequest(req)) {
         return res.status(403).json({ error: 'Admin access required.', code: 403 });
@@ -1446,6 +1452,7 @@ router.put('/', (req, res) => {
         app_name: savedAppName,
         ...dashboardPersonalViews(req.authUserId),
         disabled_modules: savedDisabledModules,
+        family_simple_navigation: cfgGet('family_simple_navigation') === '1',
         hidden_modules: savedHiddenModules,
         module_order: savedModuleOrder,
         mobile_nav_order: savedMobileNavOrder,

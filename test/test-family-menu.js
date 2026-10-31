@@ -12,7 +12,9 @@ test('family menu respects member permissions and household module switches', ()
   assert.ok(links.some(l => l.module === 'shopping'));
 });
 
-test('family menu keeps administration away from children and labels view-only access', async () => {
+test('family menu keeps administration away from children and labels view-only access', async t => {
+  const originalFetch=globalThis.fetch;t.after(()=>{globalThis.fetch=originalFetch;});
+  globalThis.fetch=async()=>Response.json({settings:{services:{photos:'https://photos.example.invalid'}},availableModules:['tvceb-knowledgebase','tvceb-whatsapp']});
   setPermissions({ modules: { meals: 'read' } });
   globalThis.__apiStub = { get: async () => ({ data: { disabled_modules: [] } }) };
   let html = '';
