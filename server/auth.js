@@ -43,6 +43,8 @@ import {
   getConfig as getOidcConfig,
   exchangeAuthorizationCode,
   describeOidcError,
+  requestedOidcScope,
+  oidcIdentityAllowed,
 } from './services/oidc.js';
 import { emailService as defaultEmailService } from './services/email.js';
 import { passwordResetService as defaultResetService } from './services/password-reset.js';
@@ -2416,7 +2418,7 @@ async function beginOidcFlow(req, config, extra = {}) {
 
   return oidcClient.buildAuthorizationUrl(config, {
     redirect_uri:          redirectUri,
-    scope:                 'openid email profile',
+    scope:                 requestedOidcScope(),
     state,
     nonce,
     code_challenge:        codeChallenge,
@@ -2556,6 +2558,12 @@ router.get('/oidc/callback', refuseWhileRestoring, async (req, res) => {
     // Identität aus dem validierten ID-Token; fetchUserInfo erzwingt sub-Abgleich
     const claims   = tokens.claims();
     const userinfo = await oidcClient.fetchUserInfo(config, tokens.access_token, claims.sub);
+
+    // Enforce the family boundary before linking, creating or signing in a user.
+    if (!oidcIdentityAllowed(claims, userinfo)) {
+      log.warn('OIDC sign-in refused by the configured family access policy.');
+      return res.redirect('/login?error=oidc_access_denied');
+    }
 
     // Verknüpfungs-Lauf (#832): der Nutzer ist bereits angemeldet und bindet
     // sein OIDC-Konto an genau dieses Konto. Kein Anlegen, kein Zuordnen über

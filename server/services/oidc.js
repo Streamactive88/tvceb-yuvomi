@@ -74,6 +74,28 @@ export function isOidcSignupAllowed() {
   return process.env.OIDC_ALLOW_SIGNUP !== 'false';
 }
 
+const configuredList = value => (value ?? '').split(',').map(item => item.trim()).filter(Boolean);
+
+// Synology's OIDC provider uses username/groups and does not offer profile.
+export function requestedOidcScope() {
+  const scopes = new Set((process.env.OIDC_SCOPES ?? 'openid email profile').trim().split(/\s+/).filter(Boolean));
+  if (!scopes.has('openid')) throw new Error('OIDC_SCOPES must include openid.');
+  if (configuredList(process.env.OIDC_ALLOWED_GROUPS).length) scopes.add('groups');
+  return [...scopes].join(' ');
+}
+
+// Only call with the verified ID-token claims and sub-matched userinfo.
+// A configured restriction fails closed when the provider omits its claim.
+export function oidcIdentityAllowed(claims, userinfo) {
+  const allowedGroups = configuredList(process.env.OIDC_ALLOWED_GROUPS);
+  const allowedUsers = configuredList(process.env.OIDC_ALLOWED_USERNAMES);
+  const groups = Object.hasOwn(userinfo ?? {}, 'groups') ? userinfo.groups : claims?.groups;
+  if (allowedGroups.length && (!Array.isArray(groups) || !groups.some(group => typeof group === 'string' && allowedGroups.includes(group)))) return false;
+  const username = userinfo?.preferred_username ?? userinfo?.username ?? claims?.preferred_username ?? claims?.username;
+  if (allowedUsers.length && (typeof username !== 'string' || !allowedUsers.includes(username))) return false;
+  return true;
+}
+
 /**
  * Der `password_hash` eines Kontos, das ausschliesslich per SSO hineinkommt.
  *
