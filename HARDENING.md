@@ -24,11 +24,10 @@ browser instance without the image. No private image is required to build.
 
 The Synology template uses `unless-stopped`. RTSP camera-ID allowlists are
 enforced, recorder previews use substreams, and decoding is capped at four
-simultaneous channels. The pinned Immich patch emits a SHA-256 manifest; verify
-and retain it alongside the generated compiled file before building.
-The checksum of the currently deployed compiled file has not been captured:
-saved browser permissions block the read-only NAS check. Do not substitute the
-patch-script hash for that compiled-file hash.
+simultaneous channels. The referenced photo installation subsequently retired
+Immich. This candidate removes its old custom adapter; the earlier deployed-file
+checksum task is superseded. Preserve the current Family Photo Share and PhotoPrism
+installations and their photo data.
 
 ## Validation
 
@@ -57,3 +56,29 @@ not rerun; the affected suites above were run.
 NAS runtime changes are separate from this source review. Preserve private
 configuration when deploying these templates. Historical commits and previously
 shared archives may still contain the old deployment topology.
+
+## Family hub follow-up
+
+Family home, knowledgebase, member administration and official WhatsApp entry are
+prepared in source. The latest user choice allows everyone with edit access to
+edit shared articles. Children submit new articles for parent review; parents
+publish/archive. A separate SQLite sidecar enforces sessions, module permissions,
+draft privacy, origin/CSRF checks and optimistic edit versions.
+
+Focused Linux checks passed for the admin-only menu preference, preference
+navigation, extension permissions, family service/menu/navigation and settings
+navigation. Local suite-chain and broker configuration checks pass. The pinned
+Keycloak 26.8.1 image successfully imported the generated fixture realm with
+explicit profile/email/groups scopes. Nine Photo Share callback boundary checks
+pass under official Ruby 3.4; CI includes that adapter job. Full Rails/Bundler
+integration and real NAS SSO callbacks remain unverified.
+
+Chrome desktop fixture checks: family menu renders; administrator saves service
+settings and per-member access; child saves a published article edit and submits
+a pending new article; WhatsApp phone instructions render. No relevant browser
+warnings/errors were recorded. Mobile layout and private phone linking remain
+untested. These checks used fake users and no family data.
+
+This source candidate is not deployed. The saved Dockhand browser restriction
+still blocks NAS access. SSO requires private identity/service bindings and
+individual callback tests before activation; no working NAS sign-in is replaced.

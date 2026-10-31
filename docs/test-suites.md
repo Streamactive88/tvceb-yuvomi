@@ -796,9 +796,14 @@ Der erste Lauf lieferte zwei Ursachen für 39 × 2 × 2 Zustände. Erstens: `res
 - `npm run test:family-menu`: The optional family page respects module and member permissions; uses the browser import loader.
 - `npm run test:oidc-family-policy`: Exact group/person allowlists, spaced group names and shared-email account-link protection.
 - `npm run test:cctv-policy`: Read-only camera authorization, RTSP camera-ID filtering, substreams and decoder limit.
-- `npm run test:immich-family-policy`: Only approved NAS identities map to existing ordinary photo accounts.
 - `npm run test:recovery-options`: Explicit account rename options and hidden, interactive temporary-password entry.
 - `npm run test:recovery-cleanup`: Consumed, revoked and expired recovery tokens remove the matching private file.
 - `npm run test:recover-admin`: Real CLI preserves the administrator username, performs explicit rename and removes the redeemed recovery file.
 - `npm run test:fork-hygiene`: LF-only source, Node version file, restart policy and absence of inherited publishing/ownership files.
 - `npm run test:family-portrait`: Missing private family artwork renders the built-in brand mark.
+
+- `npm run test:family-hub-service`: Parent publishing, child submissions, draft privacy, session/module gates, independent CSRF and admin-only private service configuration.
+- `npm run test:family-navigation`: Simplified menu filtering preserves access boundaries and falls back without the Family home module.
+- `npm run test:family-admin-preferences`: Household menu preference is administrator-only and cannot be partially changed by a non-admin request.
+
+- `npm run test:sso-preparation`: explicit family broker mappings, restricted grants and fail-closed configuration validation.

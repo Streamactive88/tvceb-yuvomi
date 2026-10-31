@@ -1,0 +1,7 @@
+{
+  "issuer": "https://family-login.example.invalid/realms/tvceb-family",
+  "clientId": "photos",
+  "clientSecret": "REPLACE_PRIVATELY",
+  "redirectUri": "https://photos.example.invalid/users/auth/openid_connect/callback",
+  "members": [{"subject":"BROKER_USER_UUID","username":"parent1","userId":1,"expectedEmail":"parent1@example.invalid"}]
+}

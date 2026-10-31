@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
   pull_request:
-    branches: [main]
+    branches: [main, codex/fork-hardening]
   # Von Hand startbar, weil ein Push zweimal ganz durchgefallen ist: am 2.9.2026
   # legte GitHub fuer die neuen Heads von #930 und #993 GAR KEINEN Lauf an -
   # keinen wartenden, keinen fehlgeschlagenen. Ohne diesen Trigger bleibt als
@@ -137,3 +137,16 @@ jobs:
 
       - name: Run the fasting browser suite
         run: npm run test:fasting-browser
+
+  family-photo-adapter:
+    name: Family Photo Share callback boundaries
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    container: ruby:3.4-slim@sha256:3a8122c4267d89a95b1ce0f3029b44e325180314661856300d29d3e8a80ec46f
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Check adapter syntax and callback access boundaries
+        run: |
+          ruby -c extensions/tvceb-sso/adapters/family-photo-share/family_oidc.rb
+          ruby -c extensions/tvceb-sso/adapters/family-photo-share/family_oidc_callbacks_controller.rb
+          ruby extensions/tvceb-sso/test/photo_callback_test.rb

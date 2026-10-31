@@ -1,0 +1,30 @@
+services:
+  tvceb-family-service:
+    build: ./service
+    image: tvceb-family-service:2.0.0
+    restart: unless-stopped
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    mem_limit: 256m
+    pids_limit: 64
+    environment:
+      FAMILY_PUBLIC_ORIGIN: ${FAMILY_PUBLIC_ORIGIN:?Set the private HTTPS portal origin}
+      YUVOMI_INTERNAL_URL: http://tvceb:3000
+      FAMILY_SERVICE_CONFIG_FILE: /run/secrets/family_services
+    volumes: ["./data:/data"]
+    secrets: [family_services]
+    ports: ["${FAMILY_BIND_ADDRESS:-127.0.0.1}:3247:3030"]
+    networks: [tvceb]
+    healthcheck:
+      test: [CMD, node, -e, "fetch('http://127.0.0.1:3030/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+secrets:
+  family_services:
+    file: ./secrets/family-services.json
+networks:
+  tvceb:
+    external: true
+    name: ${TVCEB_NETWORK:-tvceb-yuvomi_default}

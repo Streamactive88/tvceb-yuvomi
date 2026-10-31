@@ -3,6 +3,7 @@ import { canAccessNavModule, isNavModuleReadOnly } from '/permissions.js';
 import { esc } from '/utils/html.js';
 import { renderPageHeader, renderPageTitle, renderPageBody } from '/utils/page-layout.js';
 import { familyMarkHtml } from '/utils/family-portrait.js';
+import { familyContext } from './client.js';
 
 const item = (name, module, text) => ({ name, module, text, href: `/${module}` });
 export const groups = [
@@ -19,11 +20,6 @@ export const groups = [
   ] },
   { name: 'People', links: [item('Health', 'health', 'Keep track of health and wellbeing.'), item('Birthdays', 'birthdays', 'See whose birthday is next.')] },
   { name: 'Finance', links: [item('Budget', 'budget', 'Keep track of family spending.')] },
-  { name: 'Family apps', links: [
-    { name: 'Photo Album', text: 'Enjoy the family photos in Immich.', href: 'https://photos.example.invalid/albums', external: true },
-    { name: 'Passwords', text: 'Open your family Vaultwarden vault.', href: 'https://vault.example.invalid', external: true },
-    { name: 'Home Assistant', text: 'Open the home dashboard.', href: 'https://assistant.example.invalid', external: true },
-  ] },
 ];
 const settings = [
   { name: 'Family', text: 'Manage family members.', href: '/settings/admin/family' },
@@ -38,7 +34,7 @@ export function visibleGroups(disabled = []) {
     !link.module || (!off.has(link.module) && canAccessNavModule(link.module)))
   })).filter(group => group.links.length);
 }
-const card = link => `<a class="family-app-link" href="${esc(link.href)}"${link.external ? ' target="_blank" rel="noopener noreferrer"' : ' data-family-link'}><strong>${esc(link.name)}${link.external ? ' ↗' : ''}</strong><span>${esc(link.text)}${link.module && isNavModuleReadOnly(link.module) ? ' · View only' : ''}</span></a>`;
+const card = link => `<a class="family-app-link" href="${esc(link.href)}"${link.external ? ' target="_blank" rel="noopener noreferrer"' : ' data-family-link'}><strong>${esc(link.name)}${link.external ? ' ↗' : ''}</strong><span>${esc(link.text)}${link.module && isNavModuleReadOnly(link.href.startsWith('/m/')?'third-party-'+link.module:link.module) ? ' · View only' : ''}</span></a>`;
 const section = group => `<section aria-label="${esc(group.name)}"><h2 class="family-app-group">${esc(group.name)}</h2>${group.name === 'Household' ? '<p>Kitchen: Meals · Recipes · Shopping · Pantry</p>' : ''}<div class="family-app-links">${group.links.map(card).join('')}</div></section>`;
 export async function render(container, { user, signal }) {
   container.replaceChildren();
@@ -50,8 +46,18 @@ export async function render(container, { user, signal }) {
   }
   if (signal?.aborted) return;
   const sections = visibleGroups(disabled);
-  if (user?.role === 'admin') sections.push({ name: 'Settings', links: settings });
-  container.insertAdjacentHTML('beforeend', renderPageHeader({ title: renderPageTitle('Family menu') }) + renderPageBody({ content: `<div class="family-app-intro"><span class="family-app-picture" data-family-mark>${familyMarkHtml()}</span><div><h2>What would you like to do?</h2><p>Choose a name below to get started.</p></div></div>${sections.map(section).join('')}` }));
+  let context;
+  try { context = await familyContext(signal); } catch { /* Built-in activities remain usable if the optional sidecar is unavailable. */ }
+  if (signal?.aborted) return;
+  const links = [
+    { name:'Knowledgebase', text:'Read, write or improve a family guide.', href:'/m/tvceb-knowledgebase', module:'tvceb-knowledgebase' },
+    { name:'Family messages', text:'Open your family WhatsApp group.', href:'/m/tvceb-whatsapp', module:'tvceb-whatsapp' },
+    { name:'Cameras', text:'View the family cameras.', href:'/m/tvceb-cctv', module:'tvceb-cctv' },
+    ...[['photos','Photos','Open Family Photo Share.'],['photoprism','Photo library','Open PhotoPrism.'],['vaultwarden','Passwords','Open your family vault.'],['homeassistant','Home Assistant','Open your home dashboard.']].filter(([id])=>context?.settings.services[id]).map(([id,name,text])=>({name,text,href:context.settings.services[id],external:true,module:id==='vaultwarden'?'tvceb-vaultwarden':null})),
+  ].filter(link=>!link.module||context?.availableModules.includes(link.module)&&canAccessNavModule('third-party-'+link.module));
+  sections.unshift({name:'Family home',links});
+  if (user?.role === 'admin') sections.push({ name: 'Settings', links: [{name:'Family setup',text:'Manage accounts, modules, photos and family messages.',href:'/settings/modules/ext/tvceb-family'},...settings] });
+  container.insertAdjacentHTML('beforeend', renderPageHeader({ title: renderPageTitle('Family home') }) + renderPageBody({ content: `<div class="family-app-intro"><span class="family-app-picture" data-family-mark>${familyMarkHtml()}</span><div><h2>What would you like to do?</h2><p>Choose a name below to get started.</p></div></div>${sections.map(section).join('')}` }));
   container.querySelectorAll('[data-family-link]').forEach(link => {
     link.addEventListener('click', event => {
       if (event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
